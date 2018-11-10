@@ -3,7 +3,7 @@
   {
     "name" : "Adam",
     "password" : "abcd1234",
-    "followers" : "user3",
+    "following" : "user3",
     "posts" :
     {
       "1" : "Hello,  the best app ever",
@@ -15,7 +15,7 @@
   {
     "name" : "Navi",
     "password" : "abcd1234",
-    "followers" : "user3",
+    "following" : "user3",
     "posts" :
     {
       "1" : "Thanks for this platform",
@@ -27,7 +27,7 @@
   {
     "name" : "Jon Doe",
     "password" : "abcd1234",
-    "followers" : "user1,user2",
+    "following" : "user1,user2",
     "posts" :
     {
       "1" : "Well, well well... if it isn't everyone's friend",
