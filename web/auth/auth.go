@@ -36,7 +36,7 @@ func main() {
 */
 
 // adding auth.go for JWT and custom claims which has an expiration time and which will enable required authentication paradigms
-package main
+package auth
 
 import (
 	"net/http"
