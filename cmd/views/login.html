@@ -149,15 +149,34 @@ width:80%;
 </style>
 </head>
 <script>
-function doLogin()
+/* function doLogin()
 {
   var x= btoa(document.getElementById('password'));
-  console.log( x);
+  console.log("login"|| x);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "/login", true)
+  xhr.setRequestHeader("Authorization", "Basic " + x);
+  xhr.send();
+  document.getElementById('password')="";
   //var header="Authorization: Basic " + x;
   //var request = client.request('GET', '/', header);
   //console.log( header);
-  document.getElementById("login").submit();
+  //document.getElementById("login").submit();
 }
+function doSignup()
+{
+  var x= btoa(document.getElementById('spassword'));
+  console.log("signup"|| x);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "/signup", true)
+  xhr.setRequestHeader("Authorization", "Basic " + x);
+  xhr.send();
+  document.getElementById('spassword')="";
+  //var header="Authorization: Basic " + x;
+  //var request = client.request('GET', '/', header);
+  //console.log( header);
+  //document.getElementById("login").submit();
+} */
 </script>
 <body>
 <div id="wrapper">
@@ -166,8 +185,8 @@ function doLogin()
  <p class="form_label"></p>
 <form method="post" action="/login" id="login">
 <p><input type="text" placeholder="Enter Username" name="uname"></p>
-<p><input type="password" placeholder="**********" name="password" id="password" minlength="8" required></p>
-<p><input type="submit" value="LOGIN" onClick="doLogin()"></p>
+<p><input type="password" placeholder="**********" name="password" id="password"  required></p>
+<p><input type="submit" value="LOGIN" ></p>
 </form>
 </div>
 <br>
@@ -175,11 +194,11 @@ function doLogin()
 <br>
 <div class="form_div">
 <p class="form_label"></p>
-<form method="post" action="">
+<form method="post" action="/signup" id="signup">
 <p><input type="text" placeholder="Enter Name" name ="sname"></p>
 <p><input type="text" placeholder="Enter username" name="susername"></p>
 <p><input type="password" placeholder="**********" name ="spassword"></p>
-<p><input type="submit" value="SIGNUP"></p>
+<p><input type="submit" value="SIGNUP" ></p>
 </form>
 </div>
 
