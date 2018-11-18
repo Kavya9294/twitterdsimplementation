@@ -51,5 +51,27 @@ func GetCurrentUser(req *http.Request) User {
 	}
 
 	return User{"", "", []string{""}}
+}
 
+func AddFollower(suser string, duser string) []string {
+	i := 0
+	for Users[i].Username != suser {
+		i++
+	}
+	Users[i].Following = append(Users[i].Following, duser)
+	return Users[i].Following
+}
+
+func RemoveFollower(suser string, duser string) []string {
+	i := 0
+	var temp []string
+	for Users[i].Username != suser {
+		i++
+	}
+	for j := 0; j < len(Users[i].Following); j++ {
+		if Users[i].Following[j] != duser {
+			temp = append(temp, Users[i].Following[j])
+		}
+	}
+	return temp
 }
