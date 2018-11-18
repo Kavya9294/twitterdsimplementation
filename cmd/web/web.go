@@ -17,6 +17,9 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		log.Printf("Entering signup %d", len(mymem.Users))
 		un, pw := auth.DoAuthSignup(r)
+		if un == "" {
+			log.Print("Duplicate username ")
+		}
 		mymem.AddUser(un, pw)
 		log.Print("New users     -> ", mymem.Users)
 
