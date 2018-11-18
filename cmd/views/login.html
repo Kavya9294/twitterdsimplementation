@@ -1,8 +1,9 @@
 <html>
+
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<style>
-body
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <style>
+    body
 {
  margin:0 auto;
  padding:0px;
@@ -149,59 +150,70 @@ width:80%;
 </style>
 </head>
 <script>
-  
- function doLogin()
-{
-  var x= btoa(document.getElementById('password').value);
-  var y= document.getElementById('uname').value;
-  console.log("login"|| x);
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/login", true)
-  xhr.setRequestHeader("Authorization", "Basic:" + y+" " + x);
-  
-  //document.getElementById('password')="";
-  xhr.send();
-  //document.getElementById("login").submit();
-}
-function doSignup()
-{
-  var x1= btoa(document.getElementById('spassword').value);
-  var y1= document.getElementById('susername').value;
-  console.log("signup"|| x);
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/signup", true)
-  xhr.setRequestHeader("Authorization", "Basic:"+ y1+" " + x1);
-  xhr.send();
-  //document.getElementById('spassword')="";
- 
-  //document.getElementById("login").submit();
 
-} 
+  function doLogin() {
+    var x = btoa(document.getElementById('password').value);
+    var y = document.getElementById('uname').value;
+    document.getElementById('password').value="";
+    console.log("login" || x);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/login", true)
+    xhr.setRequestHeader("Authorization", "Basic:" + y + " " + x);
+
+    xhr.send();
+    xhr.onreadystatechange = function () {
+      if (xhr.status == 202 && xhr.readyState == 4) {
+        alert("Incorrect Credentials");
+      }
+     
+    }
+  }
+
+  function doSignup() {
+    var x1 = btoa(document.getElementById('spassword').value);
+    var y1 = document.getElementById('susername').value;
+    document.getElementById('spassword').value="";
+    console.log("signup" || x);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/signup", true)
+    xhr.setRequestHeader("Authorization", "Basic:" + y1 + " " + x1);
+    xhr.send();
+    
+    xhr.onreadystatechange = function () {
+      if (xhr.status == 202 && xhr.readyState == 4) {
+        alert("Duplicate username entered");
+      }
+    }
+    //document.getElementById("login").submit();
+
+  } 
 </script>
+
 <body>
-<div id="wrapper">
+  <div id="wrapper">
 
-<div class="form_div">
- <p class="form_label"></p>
-<form method="post" id="login">
-<p><input type="text" placeholder="Enter Username" name="uname" id="uname"></p>
-<p><input type="password" placeholder="**********" name="password" id="password"  required></p>
-<p><input type="button" value="LOGIN" onclick="return doLogin(); submit();"></p>
-</form>
-</div>
-<br>
-<br>
-<br>
-<div class="form_div">
-<p class="form_label"></p>
-<form method="post"  id="signup">
-<p><input type="text" placeholder="Enter Name" name ="sname"></p>
-<p><input type="text" placeholder="Enter username" name="susername" id="susername"></p>
-<p><input type="password" placeholder="**********" name ="spassword" id="spassword"></p>
-<p><input type="button" value="SIGNUP" onclick="return doSignup(); submit();"></p>
-</form>
-</div>
+    <div class="form_div">
+      <p class="form_label"></p>
+      <form method="post" id="login">
+        <p><input type="text" placeholder="Enter Username" name="uname" id="uname"></p>
+        <p><input type="password" placeholder="**********" name="password" id="password" required></p>
+        <p><input type="button" value="LOGIN" onclick="doLogin()"></p>
+      </form>
+    </div>
+    <br>
+    <br>
+    <br>
+    <div class="form_div">
+      <p class="form_label"></p>
+      <form method="post" id="signup">
+        <p><input type="text" placeholder="Enter Name" name="sname"></p>
+        <p><input type="text" placeholder="Enter username" name="susername" id="susername"></p>
+        <p><input type="password" placeholder="**********" name="spassword" id="spassword"></p>
+        <p><input type="button" value="SIGNUP" onclick="doSignup()"></p>
+      </form>
+    </div>
 
-</div>
+  </div>
 </body>
+
 </html>
