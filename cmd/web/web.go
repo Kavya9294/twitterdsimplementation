@@ -53,27 +53,31 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 
-	all_posts := mymem.PostsList
-	log.Print("all posts: ", all_posts)
-	users := mymem.Users
-	cur_user := users[0]
-	cur_posts := cur_user.GetPosts(all_posts)
-	t := template.Must(template.New("posts").ParseFiles("../views/post.html"))
-	err := t.ExecuteTemplate(w, "post.html", cur_posts)
-	if err != nil {
-		log.Fatal("Some error: ", err)
+	cur_user := mymem.GetCurrentUser(r)
+
+	if cur_user.Username == "" {
+		log.Fatal("User not authorized")
+		// Redirect to login
+	} else {
+		all_posts := mymem.PostsList
+		log.Print("all posts: ", all_posts)
+		log.Print("current_user: ", cur_user)
+		cur_posts := cur_user.GetPosts(all_posts)
+
+		if r.Method == "POST" {
+			r.ParseForm()
+			newPost := mymem.Post{r.FormValue("author"), r.FormValue("desc")}
+			all_posts = newPost.AppendPost()
+			log.Print("postList in POST: ", all_posts)
+			http.Redirect(w, r, "/posts", http.StatusSeeOther)
+		}
+		log.Print("Posts for current user: ", cur_posts)
+		t := template.Must(template.New("posts").ParseFiles("../views/post.html"))
+		err := t.ExecuteTemplate(w, "post.html", cur_posts)
+		if err != nil {
+			log.Fatal("Some error: ", err)
+		}
 	}
-	if r.Method == "POST" {
-
-		r.ParseForm()
-		newPost := mymem.Post{r.FormValue("author"), r.FormValue("desc")}
-		all_posts = newPost.AppendPost()
-		log.Print("postList in POST: ", all_posts)
-		http.Redirect(w, r, "/posts", http.StatusSeeOther)
-
-	}
-	log.Print("Posts for current user: ", cur_posts)
-
 }
 
 func main() {

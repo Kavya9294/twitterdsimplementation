@@ -17,8 +17,8 @@ var Users []User
 
 func Initialize() {
 	Users = []User{
-		{"Kavya", "eWlwcGVl", []string{"nikhila", "Kavya"}},
-		{"nikhila", "aGVsbG8=", []string{"nikhila"}},
+		{"Kavya", "eWlwcGVl", []string{"Nikhila", "Kavya"}},
+		{"Nikhila", "aGVsbG8=", []string{"Nikhila"}},
 		{"Navi", "bm9pY2VlZQ==", []string{"Navi"}},
 	}
 
