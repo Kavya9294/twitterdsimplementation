@@ -149,44 +149,44 @@ width:80%;
 </style>
 </head>
 <script>
-/* function doLogin()
+  
+ function doLogin()
 {
-  var x= btoa(document.getElementById('password'));
+  var x= btoa(document.getElementById('password').value);
+  var y= document.getElementById('uname').value;
   console.log("login"|| x);
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "/login", true)
-  xhr.setRequestHeader("Authorization", "Basic " + x);
+  xhr.setRequestHeader("Authorization", "Basic:" + y+" " + x);
+  
+  //document.getElementById('password')="";
   xhr.send();
-  document.getElementById('password')="";
-  //var header="Authorization: Basic " + x;
-  //var request = client.request('GET', '/', header);
-  //console.log( header);
   //document.getElementById("login").submit();
 }
 function doSignup()
 {
-  var x= btoa(document.getElementById('spassword'));
+  var x1= btoa(document.getElementById('spassword').value);
+  var y1= document.getElementById('susername').value;
   console.log("signup"|| x);
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "/signup", true)
-  xhr.setRequestHeader("Authorization", "Basic " + x);
+  xhr.setRequestHeader("Authorization", "Basic:"+ y1+" " + x1);
   xhr.send();
-  document.getElementById('spassword')="";
-  //var header="Authorization: Basic " + x;
-  //var request = client.request('GET', '/', header);
-  //console.log( header);
+  //document.getElementById('spassword')="";
+ 
   //document.getElementById("login").submit();
-} */
+
+} 
 </script>
 <body>
 <div id="wrapper">
 
 <div class="form_div">
  <p class="form_label"></p>
-<form method="post" action="/login" id="login">
-<p><input type="text" placeholder="Enter Username" name="uname"></p>
+<form method="post" id="login">
+<p><input type="text" placeholder="Enter Username" name="uname" id="uname"></p>
 <p><input type="password" placeholder="**********" name="password" id="password"  required></p>
-<p><input type="submit" value="LOGIN" ></p>
+<p><input type="button" value="LOGIN" onclick="return doLogin(); submit();"></p>
 </form>
 </div>
 <br>
@@ -194,11 +194,11 @@ function doSignup()
 <br>
 <div class="form_div">
 <p class="form_label"></p>
-<form method="post" action="/signup" id="signup">
+<form method="post"  id="signup">
 <p><input type="text" placeholder="Enter Name" name ="sname"></p>
-<p><input type="text" placeholder="Enter username" name="susername"></p>
-<p><input type="password" placeholder="**********" name ="spassword"></p>
-<p><input type="submit" value="SIGNUP" ></p>
+<p><input type="text" placeholder="Enter username" name="susername" id="susername"></p>
+<p><input type="password" placeholder="**********" name ="spassword" id="spassword"></p>
+<p><input type="button" value="SIGNUP" onclick="return doSignup(); submit();"></p>
 </form>
 </div>
 

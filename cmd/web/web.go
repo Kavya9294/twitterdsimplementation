@@ -3,11 +3,11 @@ package main
 import (
 	//"fmt"
 
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	//"os"
@@ -39,18 +39,18 @@ var users []user_info
 
 func basic_user_details() {
 	users = []user_info{
-		{"nikhila", "hello"},
-		{"ubeee", "yippee"},
-		{"poorna", "noiceee"},
+		{"nikhila", "aGVsbG8="},
+		{"ubeee", "eWlwcGVl"},
+		{"poorna", "bm9pY2VlZQ=="},
 	}
 
-	fmt.Print(users)
+	/* fmt.Print(users)
 	for _, j := range users {
 		fmt.Print(j.username + " ")
 		fmt.Print(j.password)
 		fmt.Println("")
 	}
-	log.Printf(" hii %d", len(users))
+	log.Printf(" hii %d", len(users)) */
 }
 
 func checkUser(un string, pw string) bool {
@@ -72,8 +72,16 @@ func checkUser(un string, pw string) bool {
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		log.Printf("hello signup %d", len(users))
-		newUser := user_info{r.FormValue("susername"), r.FormValue("spassword")}
-		log.Print("newUser", newUser)
+		//newUser := user_info{r.FormValue("susername"), r.FormValue("spassword")}
+		//log.Print("newUser", newUser)
+
+		auth := r.Header.Get("Authorization")
+		log.Print("header ->")
+		log.Print(r.Header)
+		str := strings.Split(auth, ":")
+		str2 := strings.Split(str[1], " ")
+		un, pw := str2[0], str2[1]
+		newUser := user_info{un, pw}
 		users = append(users, newUser)
 		log.Print("users     -> ", users)
 
@@ -97,13 +105,19 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		//basic_user_details()
 		log.Printf("hello %d", len(users))
-		loggedUser := user_info{r.FormValue("uname"), r.FormValue("password")}
+		//loggedUser := user_info{r.FormValue("uname"), r.FormValue("password")}
 		//auth_user, auth_pass, ok := r.Header
 		log.Print("header ->")
 		log.Print(r.Header)
 		//log.Print("header2 " + auth_pass)
 		//log.Print(ok)
-		stat := checkUser(loggedUser.username, loggedUser.password)
+		auth := r.Header.Get("Authorization")
+		str := strings.Split(auth, ":")
+		str2 := strings.Split(str[1], " ")
+		un, pw := str2[0], str2[1]
+
+		log.Print(auth)
+		stat := checkUser(un, pw)
 
 		log.Print(stat)
 		if stat == true {
@@ -113,11 +127,19 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			//newPost := post{r.FormValue("author"), r.FormValue("desc")}
 			//postsList = append(postsList, newPost)
 			//log.Print("postList in POST: ", postsList)
+			http.SetCookie(w, &http.Cookie{
+				Name:    "userInfo",
+				Value:   un + ":" + pw,
+				Expires: time.Now().Add(1 * time.Hour),
+			})
 		}
-		log.Print("Uname and pwd", loggedUser.username, loggedUser.password)
+		//log.Print("Uname and pwd", loggedUser.username, loggedUser.password)
 
 		//ts := template.Must(template.New("posts").ParseFiles("../views/posts.html"))
 		//http.Redirect(w, r, "/posts.html", http.StatusSeeOther)
+
+		//r.AddCookie
+
 	}
 
 	err := t.ExecuteTemplate(w, "login.html", users)
