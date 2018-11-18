@@ -10,7 +10,7 @@ import (
 )
 
 // jwtCustomClaims are custom claims extending default ones.
-func DoAuthSignup(r *http.Request) (string, string) {
+func DoAuthSignup(r *http.Request, w http.ResponseWriter) (string, string) {
 	auth := r.Header.Get("Authorization")
 	log.Print("Auth Header ->")
 	log.Print(r.Header)
@@ -22,6 +22,13 @@ func DoAuthSignup(r *http.Request) (string, string) {
 			return "", ""
 		}
 	}
+
+	log.Print("Added User Cookie")
+	http.SetCookie(w, &http.Cookie{
+		Name:    "userInfo",
+		Value:   un + ":" + pw,
+		Expires: time.Now().Add(1 * time.Hour),
+	})
 
 	return un, pw
 }
