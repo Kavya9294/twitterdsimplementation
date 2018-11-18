@@ -1,18 +1,33 @@
 package mymem
 
-/* func add_user(user_name string, password string) {
-	new_user := user_name
-	new_pw := password
-	append(user_info, user_name, password)
-} */
+import "fmt"
 
-func check_user(un string, pw string) bool {
-	us := make(map[string]user_info)
-	i := us[un].password
-	status := false
-	if i == pw {
-		status = true
+func AddUser(user_name string, password string) {
+	newuser := user_name
+	newPw := password
+	var x []int
+	newUser := User{newuser, newPw, x}
+	Users = append(Users, newUser)
+}
 
-	}
-	return status
+func (user User) GetPosts(posts []Post) []Post {
+	fmt.Print("In get Posts")
+	var followingPosts []Post
+	//all_posts := posts
+	//ub to handle
+	/* for _, following := range user.Following {
+		for _, ind_post := range all_posts {
+			if ind_post.Username == ind_post.Username {
+
+				followingPosts = append(followingPosts, ind_post)
+				fmt.Print("Posts in followingPosts: ", followingPosts)
+			}
+		}
+	} */
+	return followingPosts
+}
+
+func (new_post Post) AppendPost() []Post {
+	PostsList = append(PostsList, new_post)
+	return PostsList
 }

@@ -6,84 +6,20 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strings"
-	"time"
 
+	"../../web/auth"
+	"../../web/auth/storage/memory"
 	"github.com/gorilla/mux"
 	//"os"
 	//"strings"
 )
 
-type post struct {
-	Author string
-	Desc   string
-}
-
-var postsList []post
-
-func initPost() {
-	postsList = []post{
-		{"kavya", "We built this city"},
-		{"nikhila", "Favorite Radio City"},
-		{"navi", "On Rock and Roll"},
-	}
-
-}
-
-type user_info struct {
-	username string
-	password string
-}
-
-var users []user_info
-
-func basic_user_details() {
-	users = []user_info{
-		{"nikhila", "aGVsbG8="},
-		{"ubeee", "eWlwcGVl"},
-		{"poorna", "bm9pY2VlZQ=="},
-	}
-
-	/* fmt.Print(users)
-	for _, j := range users {
-		fmt.Print(j.username + " ")
-		fmt.Print(j.password)
-		fmt.Println("")
-	}
-	log.Printf(" hii %d", len(users)) */
-}
-
-func checkUser(un string, pw string) bool {
-	log.Print("Entering checkUser")
-	log.Print(un, " ", pw, "\n")
-	log.Print(len(users))
-
-	//m := make(map[string]string)
-	for _, j := range users {
-		if strings.Compare(un, j.username) == 0 {
-			if strings.Compare(pw, j.password) == 0 {
-				return true
-			}
-		}
-	}
-
-	return false
-}
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		log.Printf("hello signup %d", len(users))
-		//newUser := user_info{r.FormValue("susername"), r.FormValue("spassword")}
-		//log.Print("newUser", newUser)
-
-		auth := r.Header.Get("Authorization")
-		log.Print("header ->")
-		log.Print(r.Header)
-		str := strings.Split(auth, ":")
-		str2 := strings.Split(str[1], " ")
-		un, pw := str2[0], str2[1]
-		newUser := user_info{un, pw}
-		users = append(users, newUser)
-		log.Print("users     -> ", users)
+		log.Printf("Entering signup %d", len(mymem.Users))
+		un, pw := auth.DoAuthSignup(r)
+		mymem.AddUser(un, pw)
+		log.Print("New users     -> ", mymem.Users)
 
 	}
 	w.WriteHeader(200)
@@ -92,73 +28,56 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
-	/* if r.Method == "POST" {
-		r.ParseForm()
-		newPost := post{r.FormValue("author"), r.FormValue("desc")}
-		postsList = append(postsList, newPost)
-		log.Print("postList in POST: ", postsList)
-		http.Redirect(w, r, "/posts", http.StatusSeeOther)
-	} */
-	//log.Print("postList in GET: ", postsList)
 	t := template.Must(template.New("login").ParseFiles("../views/login.html"))
 	if r.Method == "POST" {
 		r.ParseForm()
-		//basic_user_details()
-		log.Printf("hello %d", len(users))
-		//loggedUser := user_info{r.FormValue("uname"), r.FormValue("password")}
-		//auth_user, auth_pass, ok := r.Header
-		log.Print("header ->")
+		log.Printf("Entering Login Handler POST %d", len(mymem.Users))
+		log.Print("Header ->")
 		log.Print(r.Header)
-		//log.Print("header2 " + auth_pass)
-		//log.Print(ok)
-		auth := r.Header.Get("Authorization")
-		str := strings.Split(auth, ":")
-		str2 := strings.Split(str[1], " ")
-		un, pw := str2[0], str2[1]
-
-		log.Print(auth)
-		stat := checkUser(un, pw)
-
-		log.Print(stat)
-		if stat == true {
-			log.Print("VALID")
-			//http.Redirect(w, r, "../views/posts.html", http.StatusSeeOther)
-			//r.ParseForm()
-			//newPost := post{r.FormValue("author"), r.FormValue("desc")}
-			//postsList = append(postsList, newPost)
-			//log.Print("postList in POST: ", postsList)
-			http.SetCookie(w, &http.Cookie{
-				Name:    "userInfo",
-				Value:   un + ":" + pw,
-				Expires: time.Now().Add(1 * time.Hour),
-			})
-		}
-		//log.Print("Uname and pwd", loggedUser.username, loggedUser.password)
-
-		//ts := template.Must(template.New("posts").ParseFiles("../views/posts.html"))
-		//http.Redirect(w, r, "/posts.html", http.StatusSeeOther)
-
-		//r.AddCookie
+		auth.DoAuthLogin(w, r)
 
 	}
 
-	err := t.ExecuteTemplate(w, "login.html", users)
+	err := t.ExecuteTemplate(w, "login.html", mymem.Users)
 	if err != nil {
 		log.Fatal("Some error: ", err)
 	}
 	w.WriteHeader(200)
 }
 
+func PostHandler(w http.ResponseWriter, r *http.Request) {
+
+	all_posts := mymem.PostsList
+	log.Print("all posts: ", all_posts)
+	users := mymem.Users
+	cur_user := users[0]
+	cur_posts := cur_user.GetPosts(all_posts)
+
+	if r.Method == "POST" {
+		r.ParseForm()
+		newPost := mymem.Post{r.FormValue("author"), r.FormValue("desc")}
+		all_posts = newPost.AppendPost()
+		log.Print("postList in POST: ", all_posts)
+		http.Redirect(w, r, "/posts", http.StatusSeeOther)
+	}
+	log.Print("Posts for current user: ", cur_posts)
+	t := template.Must(template.New("posts").ParseFiles("../views/post.html"))
+	err := t.ExecuteTemplate(w, "post.html", cur_posts)
+	if err != nil {
+		log.Fatal("Some error: ", err)
+	}
+
+}
+
 func main() {
-	initPost()
-	basic_user_details()
-	log.Print(len(users))
+
+	mymem.Initialize()
 	log.Print("Calling init")
-	log.Print("Calling basic user details")
 
 	r := mux.NewRouter()
 	r.HandleFunc("/signup", SignupHandler)
 	r.HandleFunc("/login", LoginHandler)
+	r.HandleFunc("/posts", PostHandler)
 	http.Handle("/", r)
 
 	err := http.ListenAndServe(":9090", nil)
