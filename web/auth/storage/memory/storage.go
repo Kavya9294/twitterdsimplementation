@@ -10,16 +10,16 @@ var PostsList []Post
 type User struct {
 	Username  string
 	Password  string
-	Following []int
+	Following []string
 }
 
 var Users []User
 
 func Initialize() {
 	Users = []User{
-		{"Kavya", "eWlwcGVl", []int{1, 2}},
-		{"nikhila", "aGVsbG8=", []int{2}},
-		{"Navi", "bm9pY2VlZQ==", []int{3}},
+		{"Kavya", "eWlwcGVl", []string{"nikhila", "Kavya"}},
+		{"nikhila", "aGVsbG8=", []string{"nikhila"}},
+		{"Navi", "bm9pY2VlZQ==", []string{"Navi"}},
 	}
 
 	PostsList = []Post{
