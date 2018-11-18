@@ -1,53 +1,27 @@
 package main
 
 import (
-	//"fmt"
-	"html/template"
+	"fmt"
 	"log"
 	"net/http"
-	//"os"
-	//"strings"
+	"strings"
 )
 
-type post struct {
-	Author string
-	Desc   string
-}
-
-var postsList []post
-
-func initPost() {
-	postsList = []post{
-		{"Kavya", "We built this city"},
-		{"Nikhila", "Favorite Radio City"},
-		{"Navi", "On Rock and Roll"},
+func sayHelloName(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	fmt.Println(r.Form)
+	fmt.Println("path", r.URL.Path)
+	fmt.Println("scheme", r.URL.Scheme)
+	fmt.Println(r.Form["url_long"])
+	for k, v := range r.Form {
+		fmt.Println("key:", k)
+		fmt.Println("val:", strings.Join(v, ""))
 	}
-
-}
-
-func PostHandler(w http.ResponseWriter, r *http.Request) {
-
-	log.Print(r)
-	if r.Method == "POST" {
-		r.ParseForm()
-		newPost := post{r.FormValue("author"), r.FormValue("desc")}
-		postsList = append(postsList, newPost)
-		log.Print("postList in POST: ", postsList)
-		http.Redirect(w, r, "/posts", http.StatusSeeOther)
-	}
-	log.Print("postList in GET: ", postsList)
-	t := template.Must(template.New("posts").ParseFiles("../views/post.html"))
-	err := t.ExecuteTemplate(w, "post.html", postsList)
-	if err != nil {
-		log.Fatal("Some error: ", err)
-	}
-
+	fmt.Fprintf(w, "Hello kavya")
 }
 
 func main() {
-	initPost()
-	log.Print("Calling init")
-	http.HandleFunc("/", PostHandler)
+	http.HandleFunc("/", sayHelloName)
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
