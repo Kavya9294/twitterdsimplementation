@@ -17,6 +17,12 @@ func DoAuthSignup(r *http.Request) (string, string) {
 	str := strings.Split(auth, ":")
 	str2 := strings.Split(str[1], " ")
 	un, pw := str2[0], str2[1]
+	for _, j := range mymem.Users {
+		if strings.Compare(un, j.Username) == 0 {
+			return "", ""
+		}
+	}
+
 	return un, pw
 }
 
