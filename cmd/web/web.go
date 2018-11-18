@@ -19,7 +19,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		un, pw := auth.DoAuthSignup(r, w)
 		if un == "" {
 			log.Print("Duplicate username ")
-			w.WriteHeader(202)
+			w.WriteHeader(401)
 		} else {
 			mymem.AddUser(un, pw)
 			log.Print("New users     -> ", mymem.Users)
@@ -42,6 +42,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		//r.Method = "GET"
 		if ok {
 			http.Redirect(w, r, "/posts", http.StatusFound)
+		} else {
+			http.Redirect(w, r, "/login", http.StatusUnauthorized)
 		}
 	}
 	if r.Method == "GET" {
