@@ -162,7 +162,7 @@ width:80%;
 
     xhr.send();
     xhr.onreadystatechange = function () {
-      if (xhr.status == 202 && xhr.readyState == 4) {
+      if (xhr.status == 401 && xhr.readyState == 4) {
         alert("Incorrect Credentials");
       }
      
@@ -173,6 +173,7 @@ width:80%;
     var x1 = btoa(document.getElementById('spassword').value);
     var y1 = document.getElementById('susername').value;
     document.getElementById('spassword').value="";
+    //document.getElementById("login").submit();
     console.log("signup" || x);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/signup", true)
@@ -180,11 +181,11 @@ width:80%;
     xhr.send();
     
     xhr.onreadystatechange = function () {
-      if (xhr.status == 202 && xhr.readyState == 4) {
+      if (xhr.status == 401 && xhr.readyState == 4) {
         alert("Duplicate username entered");
       }
     }
-    //document.getElementById("login").submit();
+    
 
   } 
 </script>

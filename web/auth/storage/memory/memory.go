@@ -8,6 +8,7 @@ func AddUser(user_name string, password string) {
 	newuser := user_name
 	newPw := password
 	var x []string
+	x = []string{user_name}
 	newUser := User{newuser, newPw, x}
 	Users = append(Users, newUser)
 }
