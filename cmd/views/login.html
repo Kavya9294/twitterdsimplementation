@@ -158,9 +158,18 @@ width:80%;
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "/login", true)
   xhr.setRequestHeader("Authorization", "Basic:" + y+" " + x);
+  xhr.onreadystatechange = function(){
+    if (xhr.status== 202){
+      alert("Incorrect Credentials")
+  }
+  }
   
   //document.getElementById('password')="";
   xhr.send();
+  
+  
+  
+  
   //document.getElementById("login").submit();
 }
 function doSignup()
@@ -173,7 +182,11 @@ function doSignup()
   xhr.setRequestHeader("Authorization", "Basic:"+ y1+" " + x1);
   xhr.send();
   //document.getElementById('spassword')="";
- 
+  xhr.onreadystatechange = function(){
+    if (xhr.status== 202){
+      alert("Duplicate username entered")
+  }
+  }
   //document.getElementById("login").submit();
 
 } 
@@ -186,7 +199,7 @@ function doSignup()
 <form method="post" id="login">
 <p><input type="text" placeholder="Enter Username" name="uname" id="uname"></p>
 <p><input type="password" placeholder="**********" name="password" id="password"  required></p>
-<p><input type="button" value="LOGIN" onclick="return doLogin(); submit();"></p>
+<p><input type="button" value="LOGIN" onclick="doLogin()"></p>
 </form>
 </div>
 <br>
@@ -198,7 +211,7 @@ function doSignup()
 <p><input type="text" placeholder="Enter Name" name ="sname"></p>
 <p><input type="text" placeholder="Enter username" name="susername" id="susername"></p>
 <p><input type="password" placeholder="**********" name ="spassword" id="spassword"></p>
-<p><input type="button" value="SIGNUP" onclick="return doSignup(); submit();"></p>
+<p><input type="button" value="SIGNUP" onclick="doSignup()"></p>
 </form>
 </div>
 

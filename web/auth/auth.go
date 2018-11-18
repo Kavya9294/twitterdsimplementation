@@ -40,6 +40,8 @@ func DoAuthLogin(w http.ResponseWriter, r *http.Request) {
 			Value:   un + ":" + pw,
 			Expires: time.Now().Add(1 * time.Hour),
 		})
+	} else {
+		w.WriteHeader(202)
 	}
 }
 func checkUser(un string, pw string) bool {
