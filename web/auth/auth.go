@@ -33,7 +33,7 @@ func DoAuthSignup(r *http.Request, w http.ResponseWriter) (string, string) {
 	return un, pw
 }
 
-func DoAuthLogin(w http.ResponseWriter, r *http.Request) {
+func DoAuthLogin(w http.ResponseWriter, r *http.Request) bool {
 	auth := r.Header.Get("Authorization")
 	str := strings.Split(auth, ":")
 	str2 := strings.Split(str[1], " ")
@@ -47,8 +47,11 @@ func DoAuthLogin(w http.ResponseWriter, r *http.Request) {
 			Value:   un + ":" + pw,
 			Expires: time.Now().Add(1 * time.Hour),
 		})
+		//w.WriteHeader(302)
+		return true
 	} else {
 		w.WriteHeader(202)
+		return false
 	}
 }
 func checkUser(un string, pw string) bool {

@@ -38,9 +38,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Entering Login Handler POST %d", len(mymem.Users))
 		log.Print("Header ->")
 		log.Print(r.Header)
-		auth.DoAuthLogin(w, r)
+		ok := auth.DoAuthLogin(w, r)
 		//r.Method = "GET"
-		http.Redirect(w, r, "/posts", http.StatusFound)
+		if ok {
+			http.Redirect(w, r, "/posts", http.StatusFound)
+		}
 	}
 	if r.Method == "GET" {
 		err := t.ExecuteTemplate(w, "login.html", mymem.Users)
@@ -48,7 +50,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal("Some error: ", err)
 		}
 	}
-	//w.WriteHeader(200)
+
 }
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
