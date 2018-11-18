@@ -5,16 +5,34 @@ import (
 	"testing"
 )
 
+func TestAddUser(t *testing.T) {
+	Initialize()
+	type args struct {
+		user_name string
+		password  string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{"TestAddUser1", args{"Poorna", "ak45mnop"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			AddUser(tt.args.user_name, tt.args.password)
+		})
+	}
+}
+
+/*
 func TestUser_GetPosts(t *testing.T) {
-	posts := PostsList
 	type fields struct {
 		Username  string
 		Password  string
-		UserId    int
-		Following []int
+		Following []string
 	}
 	type args struct {
-		posts *[]Post
+		posts []Post
 	}
 	tests := []struct {
 		name   string
@@ -22,23 +40,22 @@ func TestUser_GetPosts(t *testing.T) {
 		args   args
 		want   []Post
 	}{
-		{"Test1",
-			fields{"Kavya", "yippee", 1, []int{1, 2}}, args{posts},
+		{
+			"GetPostsTest1",
+			fields{"Kavya", "eWlwcGVl", []string{"Nikhila", "Kavya"}},
+			args{PostsList},
 			[]Post{
-				{"Kavya", "We built this city", 1},
-				{"Nikhila", "Favorite Radio City", 2},
-				{"Navi", "On Rock and Roll", 3},
-				{"Navi", "Coldplay rocks", 3},
-				{"Nikhila", "Hymn for the Weekend baby", 2},
+				{"Kavya", "We built this city"},
+				{"Nikhila", "Favorite Radio City"},
+				{"Nikhila", "Hymn for the Weekend baby"},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user := &User{
+			user := User{
 				Username:  tt.fields.Username,
 				Password:  tt.fields.Password,
-				UserId:    tt.fields.UserId,
 				Following: tt.fields.Following,
 			}
 			if got := user.GetPosts(tt.args.posts); !reflect.DeepEqual(got, tt.want) {
@@ -47,36 +64,35 @@ func TestUser_GetPosts(t *testing.T) {
 		})
 	}
 }
-
+*/
 func TestPost_AppendPost(t *testing.T) {
+	Initialize()
 	type fields struct {
 		Username string
 		Desc     string
-		UserId   int
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		want   []Post
 	}{
-		{"Test2", fields{"Kavya", "Hello", 1}, []Post{
-			{"Kavya", "We built this city", 1},
-			{"Nikhila", "Favorite Radio City", 2},
-			{"Navi", "On Rock and Roll", 3},
-			{"Navi", "Coldplay rocks", 3},
-			{"Nikhila", "Hymn for the Weekend baby", 2},
-			{"Kavya", "Hello", 1},
-		},
-		},
+		{"AppendPostTest1", fields{"Kavya", "Hello"}, []Post{
+			{"Kavya", "We built this city"},
+			{"Nikhila", "Favorite Radio City"},
+			{"Navi", "On Rock and Roll"},
+			{"Navi", "Coldplay rocks"},
+			{"Nikhila", "Hymn for the Weekend baby"},
+			{"Kavya", "Hello"},
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			new_post := Post{
 				Username: tt.fields.Username,
 				Desc:     tt.fields.Desc,
-				UserId:   tt.fields.UserId,
 			}
 			if got := new_post.AppendPost(); !reflect.DeepEqual(got, tt.want) {
+
 				t.Errorf("Post.AppendPost() = %v, want %v", got, tt.want)
 			}
 		})
