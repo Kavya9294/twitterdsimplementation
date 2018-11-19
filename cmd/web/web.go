@@ -47,7 +47,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Print(r.Header)
 		ok := auth.DoAuthLogin(w, r)
 		if ok {
-			http.Redirect(w, r, "/post", http.StatusFound)
+			log.Print("current_user: ", mymem.Cur_user)
 			return
 		}
 	}
@@ -55,9 +55,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
-
-	mymem.Cur_user = mymem.GetCurrentUser(r)
-	log.Print("current_user: ", mymem.Cur_user)
 
 	Following := mymem.GetAllUsers()
 

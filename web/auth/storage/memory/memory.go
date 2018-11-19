@@ -1,6 +1,7 @@
 package mymem
 
 import "fmt"
+
 import "net/http"
 import "strings"
 
@@ -36,6 +37,11 @@ func AppendPost(new_post Post) []Post {
 	return PostsList
 }
 
+func SetCurrentUser(username string, password string) {
+
+	Cur_user = User{username, password, []string{username}}
+}
+
 func GetCurrentUser(req *http.Request) User {
 	cookie, err := req.Cookie("userInfo")
 	fmt.Print("Cookie: ", cookie)
@@ -53,8 +59,8 @@ func GetCurrentUser(req *http.Request) User {
 			return Cur_user
 		}
 	}
-
 	return User{"", "", []string{""}}
+
 }
 
 func ToggleFollower(duser string) []string {
