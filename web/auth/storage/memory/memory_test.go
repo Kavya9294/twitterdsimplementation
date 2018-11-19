@@ -24,8 +24,8 @@ func TestAddUser(t *testing.T) {
 	}
 }
 
-/*
 func TestUser_GetPosts(t *testing.T) {
+	Initialize()
 	type fields struct {
 		Username  string
 		Password  string
@@ -45,9 +45,9 @@ func TestUser_GetPosts(t *testing.T) {
 			fields{"Kavya", "eWlwcGVl", []string{"Nikhila", "Kavya"}},
 			args{PostsList},
 			[]Post{
-				{"Kavya", "We built this city"},
 				{"Nikhila", "Favorite Radio City"},
 				{"Nikhila", "Hymn for the Weekend baby"},
+				{"Kavya", "We built this city"},
 			},
 		},
 	}
@@ -64,8 +64,7 @@ func TestUser_GetPosts(t *testing.T) {
 		})
 	}
 }
-*/
-/*
+
 func TestPost_AppendPost(t *testing.T) {
 	Initialize()
 	type fields struct {
@@ -84,7 +83,8 @@ func TestPost_AppendPost(t *testing.T) {
 			{"Navi", "Coldplay rocks"},
 			{"Nikhila", "Hymn for the Weekend baby"},
 			{"Kavya", "Hello"},
-		}},
+		},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -93,17 +93,15 @@ func TestPost_AppendPost(t *testing.T) {
 				Desc:     tt.fields.Desc,
 			}
 			if got := new_post.AppendPost(); !reflect.DeepEqual(got, tt.want) {
-
 				t.Errorf("Post.AppendPost() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
-*/
-func TestAddFollower(t *testing.T) {
-	Initialize()
+
+func TestToggleFollower(t *testing.T) {
+	Cur_user = User{"Kavya", "eWlwcGVl", []string{"Nikhila", "Kavya"}}
 	type args struct {
-		suser string
 		duser string
 	}
 	tests := []struct {
@@ -111,34 +109,31 @@ func TestAddFollower(t *testing.T) {
 		args args
 		want []string
 	}{
-		{"AddFollowerTest1", args{"Nikhila", "Navi"}, []string{"Nikhila", "Navi"}},
+		// TODO: Add test cases.
+		{"ToggleFollowerTest1", args{"Navi"}, []string{"Nikhila", "Kavya", "Navi"}},
+		{"ToggleFollowerTest2", args{"Nikhila"}, []string{"Kavya", "Navi"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := AddFollower(tt.args.suser, tt.args.duser); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AddFollower() = %v, want %v", got, tt.want)
+			if got := ToggleFollower(tt.args.duser); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ToggleFollower() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestRemoveFollower(t *testing.T) {
-	Initialize()
-	type args struct {
-		suser string
-		duser string
-	}
+func TestGetAllUsers(t *testing.T) {
 	tests := []struct {
 		name string
-		args args
 		want []string
 	}{
-		{"RemoveFollowerTest1", args{"Kavya", "Nikhila"}, []string{"Kavya"}},
+		// TODO: Add test cases.4
+		{"GetAllUsersTest", []string{"Nikhila", "Navi"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := RemoveFollower(tt.args.suser, tt.args.duser); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("RemoveFollower() = %v, want %v", got, tt.want)
+			if got := GetAllUsers(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetAllUsers() = %v, want %v", got, tt.want)
 			}
 		})
 	}
