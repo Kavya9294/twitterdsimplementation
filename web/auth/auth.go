@@ -39,7 +39,6 @@ func DoAuthLogin(w http.ResponseWriter, r *http.Request) bool {
 	str := strings.Split(auth, ":")
 	str2 := strings.Split(str[1], " ")
 	un, pw := str2[0], str2[1]
-	mymem.SetCurrentUser(un, pw)
 	log.Print(auth)
 	stat := checkUser(un, pw)
 	if stat == true {
@@ -49,6 +48,7 @@ func DoAuthLogin(w http.ResponseWriter, r *http.Request) bool {
 			Value:   un + ":" + pw,
 			Expires: time.Now().Add(1 * time.Hour),
 		})
+		mymem.SetCurrentUser(un, pw)
 		//w.WriteHeader(302)
 		return true
 	} else {
