@@ -165,6 +165,9 @@ width:80%;
       if (xhr.status == 401 && xhr.readyState == 4) {
         alert("Incorrect Credentials");
       }
+      else {
+        window.location.href = 'posts';  
+      }
      
     }
   }
@@ -184,6 +187,10 @@ width:80%;
       if (xhr.status == 401 && xhr.readyState == 4) {
         alert("Duplicate username entered");
       }
+      else {
+        window.location.href = 'posts';
+      }
+
     }
     
 
