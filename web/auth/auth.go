@@ -50,7 +50,7 @@ func DoAuthLogin(w http.ResponseWriter, r *http.Request) bool {
 		//w.WriteHeader(302)
 		return true
 	} else {
-		w.WriteHeader(202)
+		//w.WriteHeader(202)
 		return false
 	}
 }
