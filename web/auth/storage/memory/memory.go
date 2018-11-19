@@ -38,6 +38,7 @@ func AppendPost(new_post Post) []Post {
 
 func GetCurrentUser(req *http.Request) User {
 	cookie, err := req.Cookie("userInfo")
+	fmt.Print("Cookie: ", cookie)
 	if err != nil {
 		fmt.Print("Error in getCurrentUser : ", err)
 		return User{}
