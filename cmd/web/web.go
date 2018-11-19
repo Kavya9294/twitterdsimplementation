@@ -1,8 +1,6 @@
 package main
 
 import (
-	//"fmt"
-
 	"html/template"
 	"log"
 	"net/http"
@@ -10,8 +8,6 @@ import (
 
 	"../../web/auth"
 	"../../web/auth/storage/memory"
-	//"os"
-	//"strings"
 )
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +16,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		un, pw := auth.DoAuthSignup(r, w)
 		if un == "" {
 			log.Print("Duplicate username ")
-			w.WriteHeader(401)
+			w.WriteHeader(202)
 		} else {
 			mymem.AddUser(un, pw)
 			w.WriteHeader(302)
@@ -28,13 +24,21 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 			log.Print("New users     -> ", mymem.Users)
 		}
 	}
-	//w.WriteHeader(200)
 
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
-	t := template.Must(template.New("login").ParseFiles("../views/login.html"))
+	var t *template.Template
+
+	t = template.Must(template.New("login").ParseFiles("../views/login.html"))
+
+	if r.Method == "GET" {
+		err := t.ExecuteTemplate(w, "login.html", mymem.Users)
+		if err != nil {
+			log.Fatal("Some error: ", err)
+		}
+	}
 
 	if r.Method == "POST" {
 		r.ParseForm()
@@ -42,18 +46,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Print("Header ->")
 		log.Print(r.Header)
 		ok := auth.DoAuthLogin(w, r)
-		//r.Method = "GET"
 		if ok {
-			mymem.Cur_user = mymem.GetCurrentUser(r)
-			http.Redirect(w, r, "/posts", http.StatusFound)
+			log.Print("current_user: ", mymem.Cur_user)
+			return
 		} else {
 			http.Redirect(w, r, "/login", http.StatusUnauthorized)
-		}
-	}
-	if r.Method == "GET" {
-		err := t.ExecuteTemplate(w, "login.html", mymem.Users)
-		if err != nil {
-			log.Fatal("Some error: ", err)
 		}
 	}
 
@@ -64,7 +61,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	Following := mymem.GetAllUsers()
 
 	if mymem.Cur_user.Username == "" {
-		log.Fatal("User not authorized")
+		log.Printf("User not authorized")
 		// Redirect to login
 	} else {
 		all_posts := mymem.PostsList
@@ -74,10 +71,10 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "POST" {
 			r.ParseForm()
-			newPost := mymem.Post{r.FormValue("author"), r.FormValue("desc")}
-			all_posts = newPost.AppendPost()
+			newPost := mymem.Post{mymem.Cur_user.Username, r.FormValue("desc")}
+			all_posts = mymem.AppendPost(newPost)
 			log.Print("postList in POST: ", all_posts)
-			http.Redirect(w, r, "/posts", http.StatusSeeOther)
+			http.Redirect(w, r, "/post", http.StatusSeeOther)
 		}
 		log.Print("Posts for current user: ", cur_posts)
 		paths := []string{
@@ -109,7 +106,7 @@ func FollowsHandler(w http.ResponseWriter, r *http.Request) {
 	toggle_user := strings.TrimPrefix(r.URL.Path, "/follows/")
 	followers_list := mymem.ToggleFollower(toggle_user)
 	log.Print("followers_list: ", followers_list)
-	http.Redirect(w, r, "/posts", http.StatusSeeOther)
+	http.Redirect(w, r, "/post", http.StatusSeeOther)
 
 }
 
@@ -119,7 +116,7 @@ func main() {
 
 	http.HandleFunc("/signup", SignupHandler)
 	http.HandleFunc("/login", LoginHandler)
-	http.HandleFunc("/posts", PostHandler)
+	http.HandleFunc("/post", PostHandler)
 	http.HandleFunc("/follows/", FollowsHandler)
 
 	err := http.ListenAndServe(":9090", nil)

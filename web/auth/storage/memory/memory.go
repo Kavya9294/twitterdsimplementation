@@ -1,6 +1,7 @@
 package mymem
 
 import "fmt"
+
 import "net/http"
 import "strings"
 
@@ -11,6 +12,8 @@ func AddUser(user_name string, password string) {
 	x = []string{user_name}
 	newUser := User{newuser, newPw, x}
 	Users = append(Users, newUser)
+	Cur_user = newUser
+	fmt.Print("current_user after sign up: ", Cur_user)
 }
 
 func (user User) GetPosts(posts []Post) []Post {
@@ -29,13 +32,19 @@ func (user User) GetPosts(posts []Post) []Post {
 	return followingPosts
 }
 
-func (new_post Post) AppendPost() []Post {
+func AppendPost(new_post Post) []Post {
 	PostsList = append(PostsList, new_post)
 	return PostsList
 }
 
+func SetCurrentUser(username string, password string) {
+
+	Cur_user = User{username, password, []string{username}}
+}
+
 func GetCurrentUser(req *http.Request) User {
 	cookie, err := req.Cookie("userInfo")
+	fmt.Print("Cookie: ", cookie)
 	if err != nil {
 		fmt.Print("Error in getCurrentUser : ", err)
 		return User{}
@@ -46,12 +55,12 @@ func GetCurrentUser(req *http.Request) User {
 	un, pw := temp_string[0], temp_string[1]
 	for _, user := range Users {
 		if un == user.Username && pw == user.Password {
-			cur_user := user
-			return cur_user
+			Cur_user = user
+			return Cur_user
 		}
 	}
-
 	return User{"", "", []string{""}}
+
 }
 
 func ToggleFollower(duser string) []string {
@@ -61,7 +70,6 @@ func ToggleFollower(duser string) []string {
 	for index, following := range following_list {
 		if duser == following {
 			pos = index
-			//following_list = append(following_list[:pos], following_list[pos+1:]...)
 		}
 	}
 	if pos == -1 {
