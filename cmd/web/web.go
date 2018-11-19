@@ -23,6 +23,8 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(401)
 		} else {
 			mymem.AddUser(un, pw)
+			w.WriteHeader(302)
+
 			log.Print("New users     -> ", mymem.Users)
 		}
 	}
