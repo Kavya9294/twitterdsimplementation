@@ -16,7 +16,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		un, pw := auth.DoAuthSignup(r, w)
 		if un == "" {
 			log.Print("Duplicate username ")
-			w.WriteHeader(202)
+			w.WriteHeader(401)
 		} else {
 			mymem.AddUser(un, pw)
 			w.WriteHeader(302)
