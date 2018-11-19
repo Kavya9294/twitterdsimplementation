@@ -1,0 +1,25 @@
+{{define "following"}}
+<div class="container">
+    {{ range $i, $a := .Following}}
+    <div class="follow_body">
+      <button class="btn btn-default" id="follow_{{$i}}" onclick="toggleFollow({{$i}},{{$a}})">{{$a}}</button>
+    </div> 
+    {{end}}
+</div>
+
+<script>
+    function toggleFollow(id, name){
+      $.ajax({
+                    method : "GET",
+                    url: "/follows/"+name,
+                    datatype: "json",
+                    timeout : 100000,
+                    success : function(data) {      
+                      elem = document.getElementById("follow_"+id)
+
+                      elem.style.background = elem.style.background == "rgb(114, 0, 255)" ? "white" : "#7200ff"
+      }});
+    };
+</script>
+
+{{end}}

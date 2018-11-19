@@ -53,25 +53,37 @@ func GetCurrentUser(req *http.Request) User {
 	return User{"", "", []string{""}}
 }
 
-func AddFollower(suser string, duser string) []string {
-	i := 0
-	for Users[i].Username != suser {
-		i++
-	}
-	Users[i].Following = append(Users[i].Following, duser)
-	return Users[i].Following
-}
-
-func RemoveFollower(suser string, duser string) []string {
-	i := 0
-	var temp []string
-	for Users[i].Username != suser {
-		i++
-	}
-	for j := 0; j < len(Users[i].Following); j++ {
-		if Users[i].Following[j] != duser {
-			temp = append(temp, Users[i].Following[j])
+func ToggleFollower(duser string) []string {
+	pos := -1
+	following_list := Cur_user.Following
+	var following_new_list []string
+	for index, following := range following_list {
+		if duser == following {
+			pos = index
+			//following_list = append(following_list[:pos], following_list[pos+1:]...)
 		}
 	}
-	return temp
+	if pos == -1 {
+		following_list = append(following_list, duser)
+		following_new_list = following_list
+	} else {
+		for i, follow := range following_list {
+			if i != pos {
+				following_new_list = append(following_new_list, follow)
+			}
+		}
+	}
+	Cur_user.Following = following_new_list
+	return following_new_list
+}
+
+func GetAllUsers() []string {
+	var user_list []string
+	for _, user := range Users {
+		if user.Username != Cur_user.Username {
+			user_list = append(user_list, user.Username)
+		}
+	}
+
+	return user_list
 }

@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	"../../web/auth"
 	"../../web/auth/storage/memory"
@@ -41,6 +42,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		ok := auth.DoAuthLogin(w, r)
 		//r.Method = "GET"
 		if ok {
+			mymem.Cur_user = mymem.GetCurrentUser(r)
 			http.Redirect(w, r, "/posts", http.StatusFound)
 		}
 	}
@@ -55,16 +57,16 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 
-	cur_user := mymem.GetCurrentUser(r)
+	Following := mymem.GetAllUsers()
 
-	if cur_user.Username == "" {
+	if mymem.Cur_user.Username == "" {
 		log.Fatal("User not authorized")
 		// Redirect to login
 	} else {
 		all_posts := mymem.PostsList
 		log.Print("all posts: ", all_posts)
-		log.Print("current_user: ", cur_user)
-		cur_posts := cur_user.GetPosts(all_posts)
+		log.Print("current_user: ", mymem.Cur_user)
+		cur_posts := mymem.Cur_user.GetPosts(all_posts)
 
 		if r.Method == "POST" {
 			r.ParseForm()
@@ -74,12 +76,37 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/posts", http.StatusSeeOther)
 		}
 		log.Print("Posts for current user: ", cur_posts)
-		t := template.Must(template.New("posts").ParseFiles("../views/post.html"))
-		err := t.ExecuteTemplate(w, "post.html", cur_posts)
+		paths := []string{
+			"../views/post.html",
+			"../views/following.html",
+		}
+		var t *template.Template
+		t = template.Must(template.ParseFiles(paths...))
+		log.Print("t: ", t)
+
+		type Response struct {
+			Following []string
+			Posts     []mymem.Post
+		}
+		var response Response
+		response.Following = Following
+		response.Posts = cur_posts
+		err := t.ExecuteTemplate(w, "post.html", response)
 		if err != nil {
 			log.Fatal("Some error: ", err)
 		}
 	}
+}
+
+func FollowsHandler(w http.ResponseWriter, r *http.Request) {
+	log.Print("in Follows Handler")
+	Following := mymem.Cur_user.Following
+	log.Print("following: ", Following)
+	toggle_user := strings.TrimPrefix(r.URL.Path, "/follows/")
+	followers_list := mymem.ToggleFollower(toggle_user)
+	log.Print("followers_list: ", followers_list)
+	http.Redirect(w, r, "/posts", http.StatusSeeOther)
+
 }
 
 func main() {
@@ -89,6 +116,7 @@ func main() {
 	http.HandleFunc("/signup", SignupHandler)
 	http.HandleFunc("/login", LoginHandler)
 	http.HandleFunc("/posts", PostHandler)
+	http.HandleFunc("/follows/", FollowsHandler)
 
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {

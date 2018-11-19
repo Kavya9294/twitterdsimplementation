@@ -15,6 +15,8 @@ type User struct {
 
 var Users []User
 
+var Cur_user User
+
 func Initialize() {
 	Users = []User{
 		{"Kavya", "eWlwcGVl", []string{"Nikhila", "Kavya"}},

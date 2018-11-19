@@ -3,6 +3,7 @@
   <head>
     <title>Tweet Away</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <style type="text/css">
       body {
         background: #eeeeeeb8;
@@ -44,7 +45,8 @@
         text-align : center;
       }
     </style>
-  </head>
+
+    </head>
   <body>
     <div class="new_post container">
       <form action="/post" method="POST">
@@ -56,7 +58,7 @@
       </form>
     </div>
     <div class="container">
-      {{ range .}}
+      {{ range .Posts}}
         <div class="post_body">
           <div class="post_author">
             {{.Username}}
@@ -67,6 +69,7 @@
         </div>
       {{end}}
     </div>
+    {{template "following" .}}
   </body>
 </html>
 
