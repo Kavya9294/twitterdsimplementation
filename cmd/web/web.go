@@ -49,6 +49,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		if ok {
 			log.Print("current_user: ", mymem.Cur_user)
 			return
+		} else {
+			http.Redirect(w, r, "/login", http.StatusUnauthorized)
 		}
 	}
 
