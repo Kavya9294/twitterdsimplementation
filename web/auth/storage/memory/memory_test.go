@@ -5,6 +5,25 @@ import (
 	"testing"
 )
 
+func TestSetCurrentUser(t *testing.T) {
+	type args struct {
+		username string
+		password string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		// TODO: Add test cases.
+		{"SetCurrentUserTest1", args{"Kavya", "eWlwcGVl"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			SetCurrentUser(tt.args.username, tt.args.password)
+		})
+	}
+}
+
 func TestAddUser(t *testing.T) {
 	Initialize()
 	type args struct {
@@ -65,6 +84,36 @@ func TestUser_GetPosts(t *testing.T) {
 	}
 }
 
+func TestAppendPost(t *testing.T) {
+	type args struct {
+		new_post Post
+	}
+	tests := []struct {
+		name string
+		args args
+		want []Post
+	}{
+		// TODO: Add test cases.
+		{"AppendPostTest1", args{Post{"Kavya", "Hello"}}, []Post{
+			{"Kavya", "We built this city"},
+			{"Nikhila", "Favorite Radio City"},
+			{"Navi", "On Rock and Roll"},
+			{"Navi", "Coldplay rocks"},
+			{"Nikhila", "Hymn for the Weekend baby"},
+			{"Kavya", "Hello"},
+		},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := AppendPost(tt.args.new_post); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AppendPost() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+/*
 func TestPost_AppendPost(t *testing.T) {
 	Initialize()
 	type fields struct {
@@ -98,9 +147,9 @@ func TestPost_AppendPost(t *testing.T) {
 		})
 	}
 }
-
+*/
 func TestToggleFollower(t *testing.T) {
-	Cur_user = User{"Kavya", "eWlwcGVl", []string{"Nikhila", "Kavya"}}
+	Initialize()
 	type args struct {
 		duser string
 	}
@@ -110,8 +159,8 @@ func TestToggleFollower(t *testing.T) {
 		want []string
 	}{
 		// TODO: Add test cases.
-		{"ToggleFollowerTest1", args{"Navi"}, []string{"Nikhila", "Kavya", "Navi"}},
-		{"ToggleFollowerTest2", args{"Nikhila"}, []string{"Kavya", "Navi"}},
+		{"ToggleFollowerTest1", args{"Navi"}, []string{"Poorna", "Navi"}},
+		{"ToggleFollowerTest2", args{"Poorna"}, []string{"Navi"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -128,7 +177,7 @@ func TestGetAllUsers(t *testing.T) {
 		want []string
 	}{
 		// TODO: Add test cases.4
-		{"GetAllUsersTest", []string{"Nikhila", "Navi"}},
+		{"GetAllUsersTest", []string{"Kavya", "Nikhila", "Navi"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
