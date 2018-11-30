@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"../../web/auth/storage/memory"
+	//"../../web/auth/storage/memory"
 )
 
 // jwtCustomClaims are custom claims extending default ones.

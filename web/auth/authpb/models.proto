@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+
+package mymem;
+
+message User {
+  string Username=1;
+  string Password=2;
+  repeated string Followers=3;
+}
+
+message CurrentUser {
+  User CurUser=1; 
+}
+
+message Post {
+  string Username=1;
+  string Desc =2;
+}
+
+message Posts {
+  repeated Post postsList = 1;
+}
+
+message Users {
+  repeated User usersList = 1;
+}
+
+service Access {
+  rpc AddUser(User) returns(Users){}
+  rpc GetPosts(User) returns(Posts) {}
+  rpc AddPost(Post) returns(Posts){}
+  /*rpc SetCurrentUser(User) returns (CurrentUser){}*/
+  /*rpc ToggleFollower(CurrentUser) returns (CurrentUser){}*/
+  /*rpc GetAllUsers(CurrentUser) returns(Users){}*/
+}

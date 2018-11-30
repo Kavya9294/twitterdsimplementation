@@ -1,127 +1,204 @@
 package main
 
 import (
-	"html/template"
+	pb "../../web/auth/authpb"
+	//"../../web/auth"
+	"context"
+	"google.golang.org/grpc"
+	//"html/template"
 	"log"
-	"net/http"
-	"strings"
-
-	"../../web/auth"
-	"../../web/auth/storage/memory"
+	//"net/http"
+	//"strings"
 )
 
-func SignupHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		log.Printf("Entering signup %d", len(mymem.Users))
-		un, pw := auth.DoAuthSignup(r, w)
-		if un == "" {
-			log.Print("Duplicate username ")
-			w.WriteHeader(401)
-		} else {
-			mymem.AddUser(un, pw)
-			w.WriteHeader(302)
+var client pb.AccessClient
+var listOfAllUsers *pb.Users
+var listofAllPosts *pb.Posts
+var curUserPosts *pb.Posts
 
-			log.Print("New users     -> ", mymem.Users)
-		}
+func addUser(name string, password string, followers []string) *pb.Users {
+	usr := &pb.User{
+		Username:  name,
+		Password:  password,
+		Followers: followers,
 	}
+	uList, addErr := client.AddUser(context.Background(), usr)
+
+	if addErr != nil {
+		log.Fatalf("unable to add user: %v", addErr)
+	}
+	for _, u := range uList.UsersList {
+		log.Println("username: %v, Password: %v", u.Username, u.Password)
+	}
+	return uList
+}
+
+func addPost(name string, desc string) *pb.Posts {
+	post := &pb.Post{
+		Username: name,
+		Desc:     desc,
+	}
+	pList, addErr := client.AddPost(context.Background(), post)
+
+	if addErr != nil {
+		log.Fatalf("unable to add post: %v", addErr)
+	}
+	for _, p := range pList.PostsList {
+		log.Println("username: %v, Desc: %v", p.Username, p.Desc)
+	}
+	return pList
+}
+
+func getCurrentUserPosts(username string) *pb.Posts {
+	usr := &pb.User{
+		Username: username,
+	}
+	pList, addErr := client.GetPosts(context.Background(), usr)
+
+	if addErr != nil {
+		log.Fatalf("unable to get Post: %v", addErr)
+	}
+	log.Println("Current User Posts")
+	for _, p := range pList.PostsList {
+		log.Println("username: %v, Desc: %v", p.Username, p.Desc)
+	}
+	return pList
 
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+//func SignupHandler(w http.ResponseWriter, r *http.Request) {
+//if r.Method == "POST" {
+//log.Printf("Entering signup %d", len(mymem.Users))
+//un, pw := auth.DoAuthSignup(r, w)
+//if un == "" {
+//log.Print("Duplicate username ")
+//w.WriteHeader(401)
+//} else {
+//mymem.AddUser(un, pw)
+//w.WriteHeader(302)
 
-	var t *template.Template
+//log.Print("New users     -> ", mymem.Users)
+//}
+//}
 
-	t = template.Must(template.New("login").ParseFiles("../views/login.html"))
+//}
 
-	if r.Method == "GET" {
-		err := t.ExecuteTemplate(w, "login.html", mymem.Users)
-		if err != nil {
-			log.Fatal("Some error: ", err)
-		}
-	}
+//func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == "POST" {
-		r.ParseForm()
-		log.Printf("Entering Login Handler POST %d", len(mymem.Users))
-		log.Print("Header ->")
-		log.Print(r.Header)
-		ok := auth.DoAuthLogin(w, r)
-		if ok {
-			log.Print("current_user: ", mymem.Cur_user)
-			w.WriteHeader(302)
-			return
-		} else {
-			http.Redirect(w, r, "/login", http.StatusUnauthorized)
-		}
-	}
+//var t *template.Template
 
-}
+//t = template.Must(template.New("login").ParseFiles("../views/login.html"))
 
-func PostHandler(w http.ResponseWriter, r *http.Request) {
+//if r.Method == "GET" {
+//err := t.ExecuteTemplate(w, "login.html", mymem.Users)
+//if err != nil {
+//log.Fatal("Some error: ", err)
+//}
+//}
 
-	Following := mymem.GetAllUsers()
+//if r.Method == "POST" {
+//r.ParseForm()
+//log.Printf("Entering Login Handler POST %d", len(mymem.Users))
+//log.Print("Header ->")
+//log.Print(r.Header)
+//ok := auth.DoAuthLogin(w, r)
+//if ok {
+//log.Print("current_user: ", mymem.Cur_user)
+//w.WriteHeader(302)
+//return
+//} else {
+//http.Redirect(w, r, "/login", http.StatusUnauthorized)
+//}
+//}
 
-	if mymem.Cur_user.Username == "" {
-		log.Printf("User not authorized")
-		// Redirect to login
-	} else {
-		all_posts := mymem.PostsList
-		log.Print("all posts: ", all_posts)
-		log.Print("current_user: ", mymem.Cur_user)
-		cur_posts := mymem.Cur_user.GetPosts(all_posts)
+//}
 
-		if r.Method == "POST" {
-			r.ParseForm()
-			newPost := mymem.Post{mymem.Cur_user.Username, r.FormValue("desc")}
-			all_posts = mymem.AppendPost(newPost)
-			log.Print("postList in POST: ", all_posts)
-			http.Redirect(w, r, "/post", http.StatusSeeOther)
-		}
-		log.Print("Posts for current user: ", cur_posts)
-		paths := []string{
-			"../views/post.html",
-			"../views/following.html",
-		}
-		var t *template.Template
-		t = template.Must(template.ParseFiles(paths...))
-		log.Print("t: ", t)
+//func PostHandler(w http.ResponseWriter, r *http.Request) {
 
-		type Response struct {
-			Following []string
-			Posts     []mymem.Post
-		}
-		var response Response
-		response.Following = Following
-		response.Posts = cur_posts
-		err := t.ExecuteTemplate(w, "post.html", response)
-		if err != nil {
-			log.Fatal("Some error: ", err)
-		}
-	}
-}
+//Following := mymem.GetAllUsers()
 
-func FollowsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print("in Follows Handler")
-	Following := mymem.Cur_user.Following
-	log.Print("following: ", Following)
-	toggle_user := strings.TrimPrefix(r.URL.Path, "/follows/")
-	followers_list := mymem.ToggleFollower(toggle_user)
-	log.Print("followers_list: ", followers_list)
-	http.Redirect(w, r, "/post", http.StatusSeeOther)
+//if mymem.Cur_user.Username == "" {
+//log.Printf("User not authorized")
+//// Redirect to login
+//} else {
+//all_posts := mymem.PostsList
+//log.Print("all posts: ", all_posts)
+//log.Print("current_user: ", mymem.Cur_user)
+//cur_posts := mymem.Cur_user.GetPosts(all_posts)
 
+//if r.Method == "POST" {
+//r.ParseForm()
+//newPost := mymem.Post{mymem.Cur_user.Username, r.FormValue("desc")}
+//all_posts = mymem.AppendPost(newPost)
+//log.Print("postList in POST: ", all_posts)
+//http.Redirect(w, r, "/post", http.StatusSeeOther)
+//}
+//log.Print("Posts for current user: ", cur_posts)
+//paths := []string{
+//"../views/post.html",
+//"../views/following.html",
+//}
+//var t *template.Template
+//t = template.Must(template.ParseFiles(paths...))
+//log.Print("t: ", t)
+
+//type Response struct {
+//Following []string
+//Posts     []mymem.Post
+//}
+//var response Response
+//response.Following = Following
+//response.Posts = cur_posts
+//err := t.ExecuteTemplate(w, "post.html", response)
+//if err != nil {
+//log.Fatal("Some error: ", err)
+//}
+//}
+//}
+
+//func FollowsHandler(w http.ResponseWriter, r *http.Request) {
+//log.Print("in Follows Handler")
+//Following := mymem.Cur_user.Following
+//log.Print("following: ", Following)
+//toggle_user := strings.TrimPrefix(r.URL.Path, "/follows/")
+//followers_list := mymem.ToggleFollower(toggle_user)
+//log.Print("followers_list: ", followers_list)
+//http.Redirect(w, r, "/post", http.StatusSeeOther)
+
+//}
+
+func initialize() {
+
+	addUser("Nikhila", "1234", []string{"Nikhila", "Kavya", "Nikhila"})
+	addUser("Kavya", "1234", []string{"Kavya", "Navi"})
+	listOfAllUsers = addUser("Navi", "1234", []string{"Navi", "Nikhila"})
+
+	addPost("Nikhila", "Life is great")
+	addPost("Kavya", "Music is Life")
+	addPost("Navi", "Rock and roll all the way")
+	addPost("Navi", "Pink floyed-Wish you were here-#rythm#to#ears")
+	addPost("Nikhila", "Artic Monkeys#best#ever#music")
+	listofAllPosts = addPost("Kavya", "Traveller mode ON #One#Life")
+	curUserPosts = getCurrentUserPosts("Kavya")
 }
 
 func main() {
-	mymem.Initialize()
 	log.Print("Calling init")
-
-	http.HandleFunc("/signup", SignupHandler)
-	http.HandleFunc("/login", LoginHandler)
-	http.HandleFunc("/post", PostHandler)
-	http.HandleFunc("/follows/", FollowsHandler)
-
-	err := http.ListenAndServe(":9090", nil)
+	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		log.Fatalf("cannot dial server: %v", err)
 	}
+
+	client = pb.NewAccessClient(conn)
+	initialize()
+
+	//http.HandleFunc("/signup", SignupHandler)
+	//http.HandleFunc("/login", LoginHandler)
+	//http.HandleFunc("/post", PostHandler)
+	//http.HandleFunc("/follows/", FollowsHandler)
+
+	//err := http.ListenAndServe(":9090", nil)
+	//if err != nil {
+	//log.Fatal("ListenAndServe: ", err)
+	//}
 }
