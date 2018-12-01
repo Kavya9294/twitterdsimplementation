@@ -251,7 +251,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 func initialize() {
 
-	addUser("Nikhila", "aGVsbG8=", []string{"Nikhila", "Kavya", "Nikhila"})
+	addUser("Nikhila", "aGVsbG8=", []string{"Nikhila", "Kavya"})
 	addUser("Kavya", "eWlwcGVl", []string{"Kavya", "Navi"})
 	listOfAllUsers = addUser("Navi", "bm9pY2VlZQ==", []string{"Navi", "Nikhila"})
 
