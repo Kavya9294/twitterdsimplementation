@@ -1,14 +1,15 @@
 package main
 
 import (
-	"../../web/auth"
-	pb "../../web/auth/authpb"
 	"context"
-	"google.golang.org/grpc"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
+
+	"../../web/auth"
+	pb "../../web/auth/authpb"
+	"google.golang.org/grpc"
 )
 
 var client pb.AccessClient
@@ -122,36 +123,46 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
-//var t *template.Template
+	var t *template.Template
 
-//t = template.Must(template.New("login").ParseFiles("../views/login.html"))
+	t = template.Must(template.New("login").ParseFiles("../views/login.html"))
 
-//if r.Method == "GET" {
-//err := t.ExecuteTemplate(w, "login.html", mymem.Users)
-//if err != nil {
-//log.Fatal("Some error: ", err)
-//}
-//}
+	if r.Method == "GET" {
+		AllUsersForLogin := getAllUsers("login")
+		err := t.ExecuteTemplate(w, "login.html", AllUsersForLogin)
+		if err != nil {
+			log.Fatal("Some error: ", err)
+		}
+	}
 
-//if r.Method == "POST" {
-//r.ParseForm()
-////log.Printf("Entering Login Handler POST %d", len(mymem.Users))
-//log.Print("Header ->")
-//log.Print(r.Header)
-//allUsers := getAllUsers()
-//ok := auth.DoAuthLogin(w, r, allUsers)
-//if ok {
-////log.Print("current_user: ", mymem.Cur_user)
-//w.WriteHeader(302)
-//return
-//} else {
-//http.Redirect(w, r, "/login", http.StatusUnauthorized)
-//}
-//}
+	if r.Method == "POST" {
+		r.ParseForm()
+		//log.Printf("Entering Login Handler POST %d", len(mymem.Users))
+		log.Print("Header ->")
+		log.Print(r.Header)
+		allLoginUsers := getAllUsers("LOgin")
+		ok, un, pw := auth.DoAuthLogin(w, r, allLoginUsers)
+		if ok {
+			//log.Print("current_user: ", mymem.Cur_user)
+			cur_user, err := client.SetCurrentUser(context.Background(), &pb.User{
+				Username:  un,
+				Password:  pw,
+				Followers: []string{un},
+			})
+			if err != nil {
+				log.Println("error in login")
+			}
+			log.Println(cur_user)
+			w.WriteHeader(302)
+			return
+		} else {
+			http.Redirect(w, r, "/login", http.StatusUnauthorized)
+		}
+	}
 
-//}
+}
 
 func getFollowers(username string) []string {
 	usr := &pb.User{
@@ -264,7 +275,7 @@ func main() {
 	initialize()
 
 	http.HandleFunc("/", SignupHandler)
-	//http.HandleFunc("/login", LoginHandler)
+	http.HandleFunc("/login", LoginHandler)
 	http.HandleFunc("/post", PostHandler)
 	//http.HandleFunc("/follows/", FollowsHandler)
 
