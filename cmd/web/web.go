@@ -1,14 +1,14 @@
 package main
 
 import (
+	"../../web/auth"
 	pb "../../web/auth/authpb"
-	//"../../web/auth"
 	"context"
 	"google.golang.org/grpc"
-	//"html/template"
+	"html/template"
 	"log"
-	//"net/http"
-	//"strings"
+	"net/http"
+	"strings"
 )
 
 var client pb.AccessClient
@@ -66,22 +66,61 @@ func getCurrentUserPosts(username string) *pb.Posts {
 
 }
 
-//func SignupHandler(w http.ResponseWriter, r *http.Request) {
-//if r.Method == "POST" {
-//log.Printf("Entering signup %d", len(mymem.Users))
-//un, pw := auth.DoAuthSignup(r, w)
-//if un == "" {
-//log.Print("Duplicate username ")
-//w.WriteHeader(401)
-//} else {
-//mymem.AddUser(un, pw)
-//w.WriteHeader(302)
+func getAllUsers(username string) *pb.Users {
+	usr := &pb.User{
+		Username: username,
+	}
+	uList, getErr := client.GetAllUsers(context.Background(), usr)
 
-//log.Print("New users     -> ", mymem.Users)
-//}
-//}
+	if getErr != nil {
+		log.Fatalf("unable to get all users due to: %v", getErr)
+	}
+	log.Println("All users")
+	for _, u := range uList.UsersList {
+		log.Println("username: %v", u.Username)
+	}
+	return uList
 
-//}
+}
+
+func SignupHandler(w http.ResponseWriter, r *http.Request) {
+	var t *template.Template
+
+	//HardCode
+	useName := "Kavya"
+	allUsers := getAllUsers(useName)
+
+	t = template.Must(template.New("login").ParseFiles("../views/login.html"))
+
+	if r.Method == "GET" {
+		err := t.ExecuteTemplate(w, "login.html", allUsers)
+		if err != nil {
+			log.Fatal("Some error: ", err)
+		}
+	}
+	if r.Method == "POST" {
+		//log.Printf("Entering signup %d", len(mymem.Users))
+		un, pw := auth.DoAuthSignup(r, w, allUsers)
+
+		if un == "" {
+			log.Print("Duplicate username ")
+			w.WriteHeader(401)
+		} else {
+			addUser(un, pw, []string{un})
+			w.WriteHeader(302)
+			cur_user, err := client.SetCurrentUser(context.Background(), &pb.User{
+				Username:  un,
+				Password:  pw,
+				Followers: []string{un},
+			})
+			if err != nil {
+				log.Println("err,cannot assign current user due to: ", err)
+			}
+			log.Print("Current user     -> ", cur_user.CurUser.Username)
+		}
+	}
+
+}
 
 //func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -98,12 +137,13 @@ func getCurrentUserPosts(username string) *pb.Posts {
 
 //if r.Method == "POST" {
 //r.ParseForm()
-//log.Printf("Entering Login Handler POST %d", len(mymem.Users))
+////log.Printf("Entering Login Handler POST %d", len(mymem.Users))
 //log.Print("Header ->")
 //log.Print(r.Header)
-//ok := auth.DoAuthLogin(w, r)
+//allUsers := getAllUsers()
+//ok := auth.DoAuthLogin(w, r, allUsers)
 //if ok {
-//log.Print("current_user: ", mymem.Cur_user)
+////log.Print("current_user: ", mymem.Cur_user)
 //w.WriteHeader(302)
 //return
 //} else {
@@ -113,48 +153,79 @@ func getCurrentUserPosts(username string) *pb.Posts {
 
 //}
 
-//func PostHandler(w http.ResponseWriter, r *http.Request) {
+func getFollowers(username string) []string {
+	usr := &pb.User{
+		Username: username,
+	}
+	uList, getErr := client.GetAllUsers(context.Background(), usr)
 
-//Following := mymem.GetAllUsers()
+	var userList []string
+	if getErr != nil {
+		log.Println("could not get all users due to error: ", getErr)
+	} else {
 
-//if mymem.Cur_user.Username == "" {
-//log.Printf("User not authorized")
-//// Redirect to login
-//} else {
-//all_posts := mymem.PostsList
-//log.Print("all posts: ", all_posts)
-//log.Print("current_user: ", mymem.Cur_user)
-//cur_posts := mymem.Cur_user.GetPosts(all_posts)
+		for _, user := range uList.UsersList {
+			if strings.Compare(user.Username, username) != 0 {
+				userList = append(userList, user.Username)
+			}
+		}
+	}
+	return userList
 
-//if r.Method == "POST" {
-//r.ParseForm()
-//newPost := mymem.Post{mymem.Cur_user.Username, r.FormValue("desc")}
-//all_posts = mymem.AppendPost(newPost)
-//log.Print("postList in POST: ", all_posts)
-//http.Redirect(w, r, "/post", http.StatusSeeOther)
-//}
-//log.Print("Posts for current user: ", cur_posts)
-//paths := []string{
-//"../views/post.html",
-//"../views/following.html",
-//}
-//var t *template.Template
-//t = template.Must(template.ParseFiles(paths...))
-//log.Print("t: ", t)
+}
 
-//type Response struct {
-//Following []string
-//Posts     []mymem.Post
-//}
-//var response Response
-//response.Following = Following
-//response.Posts = cur_posts
-//err := t.ExecuteTemplate(w, "post.html", response)
-//if err != nil {
-//log.Fatal("Some error: ", err)
-//}
-//}
-//}
+func PostHandler(w http.ResponseWriter, r *http.Request) {
+
+	//Need to split auth header each time and get current user
+	cur_user, err := client.GetCurrentUser(context.Background(), &pb.User{Username: "kavya"})
+
+	log.Print("current_user: ", cur_user.CurUser.Username)
+
+	if err != nil {
+		log.Printf("User not authorized")
+		// Redirect to login
+	} else {
+		//all_posts := mymem.PostsList
+		//log.Print("all posts: ", all_posts)
+		Following := getFollowers(cur_user.CurUser.Username)
+		log.Print("Following: ", Following)
+		cur_posts := getCurrentUserPosts(cur_user.CurUser.Username)
+
+		log.Println("Current Users Posts: ", cur_posts)
+
+		if r.Method == "POST" {
+			r.ParseForm()
+			//newPost := &pb.Post{
+			//Username: cur_user.CurUser.Username,
+			//Desc:     r.FormValue("desc"),
+			//}
+			all_posts := addPost(cur_user.CurUser.Username, r.FormValue("desc"))
+			log.Print("postList in POST: ", all_posts)
+			http.Redirect(w, r, "/post", http.StatusSeeOther)
+		}
+		log.Print("Posts for current user: ", cur_posts)
+		paths := []string{
+			"../views/post.html",
+			"../views/following.html",
+		}
+		var t *template.Template
+		t = template.Must(template.ParseFiles(paths...))
+		log.Print("t: ", t)
+
+		type Response struct {
+			Following []string
+			Posts     *pb.Posts
+		}
+		var response Response
+		response.Following = Following
+		response.Posts = cur_posts
+		log.Println("response.Posts: ", response.Posts.PostsList)
+		err := t.ExecuteTemplate(w, "post.html", response)
+		if err != nil {
+			log.Fatal("Some error: ", err)
+		}
+	}
+}
 
 //func FollowsHandler(w http.ResponseWriter, r *http.Request) {
 //log.Print("in Follows Handler")
@@ -169,9 +240,9 @@ func getCurrentUserPosts(username string) *pb.Posts {
 
 func initialize() {
 
-	addUser("Nikhila", "1234", []string{"Nikhila", "Kavya", "Nikhila"})
-	addUser("Kavya", "1234", []string{"Kavya", "Navi"})
-	listOfAllUsers = addUser("Navi", "1234", []string{"Navi", "Nikhila"})
+	addUser("Nikhila", "aGVsbG8=", []string{"Nikhila", "Kavya", "Nikhila"})
+	addUser("Kavya", "eWlwcGVl", []string{"Kavya", "Navi"})
+	listOfAllUsers = addUser("Navi", "bm9pY2VlZQ==", []string{"Navi", "Nikhila"})
 
 	addPost("Nikhila", "Life is great")
 	addPost("Kavya", "Music is Life")
@@ -192,13 +263,13 @@ func main() {
 	client = pb.NewAccessClient(conn)
 	initialize()
 
-	//http.HandleFunc("/signup", SignupHandler)
+	http.HandleFunc("/", SignupHandler)
 	//http.HandleFunc("/login", LoginHandler)
-	//http.HandleFunc("/post", PostHandler)
+	http.HandleFunc("/post", PostHandler)
 	//http.HandleFunc("/follows/", FollowsHandler)
 
-	//err := http.ListenAndServe(":9090", nil)
-	//if err != nil {
-	//log.Fatal("ListenAndServe: ", err)
-	//}
+	server_err := http.ListenAndServe(":9090", nil)
+	if server_err != nil {
+		log.Fatal("ListenAndServe: ", server_err)
+	}
 }

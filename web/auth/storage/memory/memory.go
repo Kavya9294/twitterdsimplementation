@@ -19,6 +19,7 @@ const (
 type server struct {
 	listOfPosts []*pb.Post
 	listOfUsers []*pb.User
+	currentUser *pb.User
 }
 
 func (s *server) AddUser(ctx context.Context, in *pb.User) (*pb.Users, error) {
@@ -33,8 +34,9 @@ func (s *server) AddUser(ctx context.Context, in *pb.User) (*pb.Users, error) {
 func (s *server) GetPosts(ctx context.Context, in *pb.User) (*pb.Posts, error) {
 	fmt.Print("In get Posts")
 	user := new(pb.User)
+	currentUserName := in.Username
 	for _, i := range s.listOfUsers {
-		if i.Username == in.Username {
+		if i.Username == currentUserName {
 			user = i
 		}
 	}
@@ -59,10 +61,23 @@ func (s *server) AddPost(ctx context.Context, in *pb.Post) (*pb.Posts, error) {
 	return resp, nil
 }
 
-//func (s *server) SetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUser, error) {
-//pb.CurrentUser = in
-//return pb.CurrentUser, nil
-//}
+func (s *server) SetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUser, error) {
+	user := new(pb.CurrentUser)
+	user.CurUser = in
+	s.currentUser = in
+	return user, nil
+}
+
+func (s *server) GetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUser, error) {
+	user := new(pb.CurrentUser)
+	//for _, usr := range s.listOfUsers {
+	//if in.Username == usr.Username {
+	//user.CurUser = usr
+	//}
+	//}
+	user.CurUser = s.currentUser
+	return user, nil
+}
 
 //func GetCurrentUser(req *http.Request) User {
 //cookie, err := req.Cookie("userInfo")
@@ -108,16 +123,17 @@ func (s *server) AddPost(ctx context.Context, in *pb.Post) (*pb.Posts, error) {
 //return following_new_list
 //}
 
-//func GetAllUsers() []string {
-//var user_list []string
-//for _, user := range Users {
-//if user.Username != Cur_user.Username {
-//user_list = append(user_list, user.Username)
-//}
-//}
-
-//return user_list
-//}
+func (s *server) GetAllUsers(ctx context.Context, in *pb.User) (*pb.Users, error) {
+	user_list := new(pb.Users)
+	//userName := in.CurUser.Username
+	//for _, user := range s.listOfUsers {
+	//if userName != user.Username {
+	//user_list.UsersList = append(user_list.UsersList, user)
+	//}
+	//}
+	user_list.UsersList = s.listOfUsers
+	return user_list, nil
+}
 
 func main() {
 	lis, err := net.Listen("tcp", port)
