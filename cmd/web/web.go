@@ -249,21 +249,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 //}
 
-func initialize() {
-
-	addUser("Nikhila", "aGVsbG8=", []string{"Nikhila", "Kavya"})
-	addUser("Kavya", "eWlwcGVl", []string{"Kavya", "Navi"})
-	listOfAllUsers = addUser("Navi", "bm9pY2VlZQ==", []string{"Navi", "Nikhila"})
-
-	addPost("Nikhila", "Life is great")
-	addPost("Kavya", "Music is Life")
-	addPost("Navi", "Rock and roll all the way")
-	addPost("Navi", "Pink floyed-Wish you were here-#rythm#to#ears")
-	addPost("Nikhila", "Artic Monkeys#best#ever#music")
-	listofAllPosts = addPost("Kavya", "Traveller mode ON #One#Life")
-	curUserPosts = getCurrentUserPosts("Kavya")
-}
-
 func main() {
 	log.Print("Calling init")
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
@@ -272,7 +257,9 @@ func main() {
 	}
 
 	client = pb.NewAccessClient(conn)
-	initialize()
+	client.Initialise(context.Background(), &pb.User{
+		Username: "init",
+	})
 
 	http.HandleFunc("/", SignupHandler)
 	http.HandleFunc("/login", LoginHandler)
