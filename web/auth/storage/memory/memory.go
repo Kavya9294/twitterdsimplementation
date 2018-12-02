@@ -100,56 +100,19 @@ func (s *server) AddPost(ctx context.Context, in *pb.Post) (*pb.Posts, error) {
 func (s *server) SetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUser, error) {
 	user := new(pb.CurrentUser)
 	user.CurUser = in
-	//s.currentUser = in
+	s.currentUser = in
 	return user, nil
 }
 
 func (s *server) GetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUser, error) {
 	user := new(pb.CurrentUser)
-	for _, usr := range s.listOfUsers {
-		if in.Username == usr.Username {
-			user.CurUser = usr
-		}
-	}
-
-	//user.CurUser = s.currentUser
+	//for _, usr := range s.listOfUsers {
+	//if in.Username == usr.Username {
+	//user.CurUser = usr
+	//}
+	//}
+	user.CurUser = s.currentUser
 	return user, nil
-}
-
-func (s *server) ToggleFollowers(ctx context.Context, in *pb.FollowUser) (*pb.User, error) {
-	user := new(pb.User)
-	for _, i := range s.listOfUsers {
-		if i.Username == in.SourceUser.CurUser.Username {
-			user = i
-		}
-	}
-	pos := -1
-	following_list := user.Followers
-	var following_new_list []string
-	for index, following := range following_list {
-		if in.DestUser.Username == following {
-			pos = index
-		}
-	}
-	if pos == -1 {
-		following_list = append(following_list, in.DestUser.Username)
-		following_new_list = following_list
-	} else {
-		for i, follow := range following_list {
-			if i != pos {
-				following_new_list = append(following_new_list, follow)
-			}
-		}
-	}
-	in.SourceUser.CurUser.Followers = following_new_list
-	for i := 0; i < len(s.listOfUsers); i++ {
-		if s.listOfUsers[i].Username == in.SourceUser.CurUser.Username {
-			s.listOfUsers[i] = in.SourceUser.CurUser
-			break
-		}
-	}
-
-	return in.SourceUser.CurUser, nil
 }
 
 //func GetCurrentUser(req *http.Request) User {

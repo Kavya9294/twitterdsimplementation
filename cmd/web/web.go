@@ -236,35 +236,16 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func FollowsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print("in Follows Handler")
-	//Following := mymem.Cur_user.Following
-	//log.Print("following: ", Following)
-	toggleUser := strings.TrimPrefix(r.URL.Path, "/follows/")
-	destUser := &pb.User{
-		Username: toggleUser,
-	}
-	log.Println("dest User : ", toggleUser)
-	requester := getReqesterName(r)
-	log.Println("requester: ", requester)
-	tempUser1 := &pb.User{
-		Username: requester,
-	}
-	tempUser2 := &pb.CurrentUser{
-		CurUser: tempUser1,
-	}
-	FUser := &pb.FollowUser{
-		SourceUser: tempUser2,
-		DestUser:   destUser,
-	}
-	//curUser := getCurrentUser()
-	_, e := client.ToggleFollowers(context.Background(), FUser)
-	if e != nil {
-		log.Printf("Error")
-	}
-	//log.Print("followers_list: ", followers_list)
-	http.Redirect(w, r, "/post", http.StatusSeeOther)
-}
+//func FollowsHandler(w http.ResponseWriter, r *http.Request) {
+//log.Print("in Follows Handler")
+//Following := mymem.Cur_user.Following
+//log.Print("following: ", Following)
+//toggle_user := strings.TrimPrefix(r.URL.Path, "/follows/")
+//followers_list := mymem.ToggleFollower(toggle_user)
+//log.Print("followers_list: ", followers_list)
+//http.Redirect(w, r, "/post", http.StatusSeeOther)
+
+//}
 
 func getReqesterName(r *http.Request) string {
 	cookie, err := r.Cookie("userInfo")
@@ -276,9 +257,7 @@ func getReqesterName(r *http.Request) string {
 	if err != nil {
 		log.Print("Error in getREquesterName : ", err)
 	}
-	userInfo := cookie.Value
-	temp_string := strings.Split(userInfo, ":")
-	un := temp_string[0]
+	un := cookie.Value
 	return un
 }
 
