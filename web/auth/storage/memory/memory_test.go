@@ -1,188 +1,70 @@
-package mymem
+package main
 
 import (
+	"context"
 	"reflect"
 	"testing"
+
+	pb "../../authpb"
 )
 
-func TestSetCurrentUser(t *testing.T) {
-	type args struct {
-		username string
-		password string
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-		{"SetCurrentUserTest1", args{"Kavya", "eWlwcGVl"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			SetCurrentUser(tt.args.username, tt.args.password)
-		})
-	}
-}
-
-func TestAddUser(t *testing.T) {
-	Initialize()
-	type args struct {
-		user_name string
-		password  string
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		{"TestAddUser1", args{"Poorna", "ak45mnop"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			AddUser(tt.args.user_name, tt.args.password)
-		})
-	}
-}
-
-func TestUser_GetPosts(t *testing.T) {
-	Initialize()
+func Test_server_Initialise(t *testing.T) {
 	type fields struct {
-		Username  string
-		Password  string
-		Following []string
+		listOfPosts []*pb.Post
+		listOfUsers []*pb.User
+		currentUser *pb.User
 	}
 	type args struct {
-		posts []Post
+		ctx context.Context
+		in  *pb.User
 	}
+	testPostList := []*pb.Post{
+		&pb.Post{Username: "Nikhila", Desc: "Life is great"},
+		&pb.Post{Username: "Kavya", Desc: "Music is Life"},
+		&pb.Post{Username: "Navi", Desc: "Rock and roll all the way"},
+		&pb.Post{Username: "Navi", Desc: "Pink floyed-Wish you were here-#rythm#to#ears"},
+		&pb.Post{Username: "Nikhila", Desc: "Artic Monkeys#best#ever#music"},
+	}
+	testUserList := []*pb.User{
+		&pb.User{Username: "Nikhila", Password: "aGVsbG8=", Followers: []string{"Nikhila", "Kavya"}},
+		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
+		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
+	}
+	testCurrentUser := &pb.User{
+		Username: "Nikhila",
+		Password: "aGVsbG8=",
+		Followers: []string{"Nikhila", "Kavya"},
+		
+	}
+	testpbUser := &pb.User{
+		Username: "Nikhila"
+	}
+	testwant := new(pb.Users)
+	testwant.UsersList = testUserList
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   []Post
-	}{
-		{
-			"GetPostsTest1",
-			fields{"Kavya", "eWlwcGVl", []string{"Nikhila", "Kavya"}},
-			args{PostsList},
-			[]Post{
-				{"Nikhila", "Favorite Radio City"},
-				{"Nikhila", "Hymn for the Weekend baby"},
-				{"Kavya", "We built this city"},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			user := User{
-				Username:  tt.fields.Username,
-				Password:  tt.fields.Password,
-				Following: tt.fields.Following,
-			}
-			if got := user.GetPosts(tt.args.posts); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("User.GetPosts() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestAppendPost(t *testing.T) {
-	type args struct {
-		new_post Post
-	}
-	tests := []struct {
-		name string
-		args args
-		want []Post
+		name    string
+		fields  fields
+		args    args
+		want    *pb.Users
+		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"AppendPostTest1", args{Post{"Kavya", "Hello"}}, []Post{
-			{"Kavya", "We built this city"},
-			{"Nikhila", "Favorite Radio City"},
-			{"Navi", "On Rock and Roll"},
-			{"Navi", "Coldplay rocks"},
-			{"Nikhila", "Hymn for the Weekend baby"},
-			{"Kavya", "Hello"},
-		},
-		},
+		{"InitializeTest1",fields{testPostList,testUserList,testCurrentUser},args{context.Background(),testpbUser,nil},}
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := AppendPost(tt.args.new_post); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AppendPost() = %v, want %v", got, tt.want)
+			s := &server{
+				listOfPosts: tt.fields.listOfPosts,
+				listOfUsers: tt.fields.listOfUsers,
+				currentUser: tt.fields.currentUser,
 			}
-		})
-	}
-}
-
-/*
-func TestPost_AppendPost(t *testing.T) {
-	Initialize()
-	type fields struct {
-		Username string
-		Desc     string
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   []Post
-	}{
-		{"AppendPostTest1", fields{"Kavya", "Hello"}, []Post{
-			{"Kavya", "We built this city"},
-			{"Nikhila", "Favorite Radio City"},
-			{"Navi", "On Rock and Roll"},
-			{"Navi", "Coldplay rocks"},
-			{"Nikhila", "Hymn for the Weekend baby"},
-			{"Kavya", "Hello"},
-		},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			new_post := Post{
-				Username: tt.fields.Username,
-				Desc:     tt.fields.Desc,
+			got, err := s.Initialise(tt.args.ctx, tt.args.in)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("server.Initialise() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
-			if got := new_post.AppendPost(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Post.AppendPost() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-*/
-func TestToggleFollower(t *testing.T) {
-	Initialize()
-	type args struct {
-		duser string
-	}
-	tests := []struct {
-		name string
-		args args
-		want []string
-	}{
-		// TODO: Add test cases.
-		{"ToggleFollowerTest1", args{"Navi"}, []string{"Poorna", "Navi"}},
-		{"ToggleFollowerTest2", args{"Poorna"}, []string{"Navi"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := ToggleFollower(tt.args.duser); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ToggleFollower() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestGetAllUsers(t *testing.T) {
-	tests := []struct {
-		name string
-		want []string
-	}{
-		// TODO: Add test cases.4
-		{"GetAllUsersTest", []string{"Kavya", "Nikhila", "Navi"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := GetAllUsers(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetAllUsers() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("server.Initialise() = %v, want %v", got, tt.want)
 			}
 		})
 	}
