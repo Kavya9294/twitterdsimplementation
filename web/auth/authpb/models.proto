@@ -9,6 +9,11 @@ message User {
   repeated string Followers=3;
 }
 
+message FollowUser {
+  CurrentUser SourceUser=1;
+  User DestUser=2;
+}
+
 message CurrentUser {
   User CurUser=1; 
 }
@@ -32,7 +37,7 @@ service Access {
   rpc GetPosts(User) returns(Posts) {}
   rpc AddPost(Post) returns(Posts){}
   rpc SetCurrentUser(User) returns (CurrentUser){}
-  /*rpc ToggleFollower(CurrentUser) returns (CurrentUser){}*/
+  rpc ToggleFollowers(FollowUser) returns (User){}
   rpc GetAllUsers(User) returns(Users){}
   rpc GetCurrentUser(User) returns(CurrentUser){}
 
