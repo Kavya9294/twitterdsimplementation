@@ -1,11 +1,12 @@
 package auth
 
 import (
-	pb "../../web/auth/authpb"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	pb "../../web/auth/authpb"
 	//"../../web/auth/storage/memory"
 )
 
@@ -34,7 +35,7 @@ func DoAuthSignup(r *http.Request, w http.ResponseWriter, allUsers *pb.Users) (s
 	return un, pw
 }
 
-func DoAuthLogin(w http.ResponseWriter, r *http.Request, allUsers *pb.Users) bool {
+func DoAuthLogin(w http.ResponseWriter, r *http.Request, allUsers *pb.Users) (bool, string, string) {
 	auth := r.Header.Get("Authorization")
 	str := strings.Split(auth, ":")
 	str2 := strings.Split(str[1], " ")
@@ -50,10 +51,10 @@ func DoAuthLogin(w http.ResponseWriter, r *http.Request, allUsers *pb.Users) boo
 		})
 		//Shifted this to main package as well
 		//w.WriteHeader(302)
-		return true
+		return true, un, pw
 	} else {
 		//w.WriteHeader(202)
-		return false
+		return false, "", ""
 	}
 }
 
