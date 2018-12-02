@@ -297,7 +297,7 @@ func main() {
 	http.HandleFunc("/", SignupHandler)
 	http.HandleFunc("/login", LoginHandler)
 	http.HandleFunc("/post", PostHandler)
-	//http.HandleFunc("/follows/", FollowsHandler)
+	http.HandleFunc("/follows/", FollowsHandler)
 
 	server_err := http.ListenAndServe(":9090", nil)
 	if server_err != nil {
