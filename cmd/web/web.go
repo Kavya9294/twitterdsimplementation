@@ -86,20 +86,21 @@ func getAllUsers(username string) *pb.Users {
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var t *template.Template
 
-	//HardCode
-	useName := "Kavya"
-	allUsers := getAllUsers(useName)
-
 	t = template.Must(template.New("login").ParseFiles("../views/login.html"))
 
 	if r.Method == "GET" {
-		err := t.ExecuteTemplate(w, "login.html", allUsers)
+
+		err := t.ExecuteTemplate(w, "login.html", nil)
 		if err != nil {
 			log.Fatal("Some error: ", err)
 		}
 	}
 	if r.Method == "POST" {
-		//log.Printf("Entering signup %d", len(mymem.Users))
+		log.Println("In POST of SIGNUP")
+		//requester := getReqesterName(r)
+		//log.Println("Requester: ", requester)
+		allUsers := getAllUsers("CurUser")
+
 		un, pw := auth.DoAuthSignup(r, w, allUsers)
 
 		if un == "" {
@@ -177,7 +178,10 @@ func getFollowers(username string) []string {
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	//Need to split auth header each time and get current user
-	cur_user, err := client.GetCurrentUser(context.Background(), &pb.User{Username: "kavya"})
+	log.Println("In GET of POST")
+	requester := getReqesterName(r)
+	log.Println("Requester: ", requester)
+	cur_user, err := client.GetCurrentUser(context.Background(), &pb.User{Username: requester})
 
 	log.Print("current_user: ", cur_user.CurUser.Username)
 
@@ -185,8 +189,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("User not authorized")
 		// Redirect to login
 	} else {
-		//all_posts := mymem.PostsList
-		//log.Print("all posts: ", all_posts)
 		Following := getFollowers(cur_user.CurUser.Username)
 		log.Print("Following: ", Following)
 		cur_posts := getCurrentUserPosts(cur_user.CurUser.Username)
@@ -195,10 +197,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "POST" {
 			r.ParseForm()
-			//newPost := &pb.Post{
-			//Username: cur_user.CurUser.Username,
-			//Desc:     r.FormValue("desc"),
-			//}
 			all_posts := addPost(cur_user.CurUser.Username, r.FormValue("desc"))
 			log.Print("postList in POST: ", all_posts)
 			http.Redirect(w, r, "/post", http.StatusSeeOther)
@@ -251,6 +249,20 @@ func initialize() {
 	addPost("Nikhila", "Artic Monkeys#best#ever#music")
 	listofAllPosts = addPost("Kavya", "Traveller mode ON #One#Life")
 	curUserPosts = getCurrentUserPosts("Kavya")
+}
+
+func getReqesterName(r *http.Request) string {
+	cookie, err := r.Cookie("userInfo")
+	//auth := r.Header.Get("Authorization")
+	//log.Print("Auth Header ->")
+	//log.Print(r.Header)
+	//str := strings.Split(, ":")
+	//str2 := strings.Split(str[1], " ")
+	if err != nil {
+		log.Print("Error in getREquesterName : ", err)
+	}
+	un := cookie.Value
+	return un
 }
 
 func main() {
