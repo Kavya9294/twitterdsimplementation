@@ -17,7 +17,7 @@ func Test_checkUser(t *testing.T) {
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
 	}
-	user_resp = new(pb.Users)
+	user_resp := new(pb.Users)
 	user_resp.UsersList = listOfUsers
 	tests := []struct {
 		name string
