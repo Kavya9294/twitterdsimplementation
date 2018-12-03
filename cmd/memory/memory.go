@@ -7,7 +7,7 @@ import (
 	"log"
 	"net"
 
-	pb "../../authpb"
+	pb "../../web/auth/authpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
