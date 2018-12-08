@@ -1,8 +1,16 @@
 {{define "following"}}
-<div class="container">
+<style type="text/css">
+.btn_class {
+    width: 100%;
+    text-align: left;
+    background: #7200ff14;
+    margin: 2px;
+}
+</style>
+<div class="">
     {{ range $i, $a := .Following}}
     <div class="follow_body">
-      <button class="btn btn-default" id="follow_{{$i}}" onclick="toggleFollow({{$i}},{{$a}})">{{$a}}</button>
+      <button class="btn btn-default btn_class" id="follow_{{$i}}" onclick="toggleFollow({{$i}},{{$a}})">{{$a}}</button>
     </div> 
     {{end}}
 </div>
@@ -17,7 +25,7 @@
                     success : function(data) {      
                       elem = document.getElementById("follow_"+id)
 
-                      elem.style.background = elem.style.background == "rgb(114, 0, 255)" ? "white" : "#7200ff"
+                      elem.style.background = elem.style.background == "rgb(114, 0, 255)" ? "rgb(114,0,255,0.08)" : "#7200ff"
       }});
     };
 </script>

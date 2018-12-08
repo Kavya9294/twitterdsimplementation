@@ -32,7 +32,6 @@
       .new_post {
         background: white;
         border-radius: 3px;
-        margin-top: 5%;
         padding: 10px;
       }
       .new_post_desc {
@@ -49,13 +48,25 @@
       .width_90 {
         width: 90%;
       }
+      
+      .margin_top_5{
+        margin-top:5%;
+      }
+
+      .followers_container{
+        background: #ffffff;
+        border-radius: 3px;
+        padding:5px;
+        margin: 10px;
+
+      }
 
     </style>
 
     </head>
   <body>
-    <div class="container row">
-      <div class="col-md-offset-3 col-md-6 new_post container">
+    <div class="row margin_top_5">
+      <div class="offset-2 col-md-8 new_post container">
         <div class="new_post">
           <form action="/post" method="POST">
             <input class="form-control  width_90" type="textarea" name="desc" placeholder="Enter post description here">
@@ -77,8 +88,13 @@
           {{end}}
         </div>
       </div>
-      <div class ="col-md-3" > 
-        {{template "following" .}}
+      <div class ="col-md-2" > 
+        <div class="followers_container">
+          <div class="followes_text">
+            Followers List
+          </div>
+            {{template "following" .}}
+        </div>
       </div>
     </div>
   </body>
