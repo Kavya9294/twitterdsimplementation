@@ -33,6 +33,7 @@
         background: white;
         border-radius: 3px;
         margin-top: 5%;
+        padding: 10px;
       }
       .new_post_desc {
         padding: 15px;
@@ -41,34 +42,45 @@
       .post_btn {
         background-color: #7200ff;
       }
-      .align_center {
-        text-align : center;
+      .send_right {
+        text-align: right;
+        display: inline-block;
       }
+      .width_90 {
+        width: 90%;
+      }
+
     </style>
 
     </head>
   <body>
-    <div class="new_post container">
-      <form action="/post" method="POST">
-        <input class="form-control" type="textarea" name="desc" placeholder="Enter post description here">
-        <div class="align_center">
-          <input type="submit" class="btn btn-default post_btn" value="Post">
+    <div class="container row">
+      <div class="col-md-offset-3 col-md-6 new_post container">
+        <div class="new_post">
+          <form action="/post" method="POST">
+            <input class="form-control  width_90" type="textarea" name="desc" placeholder="Enter post description here">
+            <div class="send_right">
+              <input type="submit" class="btn btn-default post_btn" value="Post">
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
-    <div class="container">
-      {{ range .Posts.PostsList}}
-        <div class="post_body">
-          <div class="post_author">
-            {{.Username}}
-          </div>
-          <div class="post_desc">
-            {{.Desc}}
-          </div>
+        <div class="">
+          {{ range .Posts.PostsList}}
+            <div class="post_body">
+              <div class="post_author">
+                {{.Username}}
+              </div>
+              <div class="post_desc">
+                {{.Desc}}
+              </div>
+            </div>
+          {{end}}
         </div>
-      {{end}}
+      </div>
+      <div class ="col-md-3" > 
+        {{template "following" .}}
+      </div>
     </div>
-    {{template "following" .}}
   </body>
 </html>
 
