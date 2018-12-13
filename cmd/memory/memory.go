@@ -286,7 +286,7 @@ func (s *server) GetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUs
 		for _, ev := range resp.Kvs {
 			fmt.Printf("Value:  %s\n ", ev.Value)
 			_ = json.Unmarshal(ev.Value, &u_List)
-			fmt.Print("Json thing\n", u_List.UsersList)
+			fmt.Print("Json thing CurrentUser\n", u_List.UsersList)
 		}
 
 	}
@@ -327,13 +327,13 @@ func (s *server) ToggleFollowers(ctx context.Context, in *pb.FollowUser) (*pb.Us
 		for _, ev := range resp.Kvs {
 			fmt.Printf("Value:  %s\n ", ev.Value)
 			_ = json.Unmarshal(ev.Value, &u_List)
-			fmt.Print("Json thing\n", u_List.UsersList)
+			fmt.Print("Json thing Follows\n", u_List.UsersList)
 		}
 
 	}
 
 	user := new(pb.User)
-	for _, i := range u_List.UsersLists {
+	for _, i := range u_List.UsersList {
 		if i.Username == in.SourceUser.CurUser.Username {
 			user.Username = i.Username
 			user.Password = i.Password
@@ -360,13 +360,36 @@ func (s *server) ToggleFollowers(ctx context.Context, in *pb.FollowUser) (*pb.Us
 		}
 	}
 	in.SourceUser.CurUser.Followers = following_new_list
+	var temp_list pb.Users
+	var u_List2 uList
 
-	for i := 0; i < len(u_List); i++ {
-		if u_List[i].Username == in.SourceUser.CurUser.Username {
-			u_list[i] = in.SourceUser.CurUser
-			break
+	for _, usr := range u_List.UsersList {
+		u := &pb.User{
+			Username:  usr.Username,
+			Password:  usr.Password,
+			Followers: usr.Followers,
+		}
+		log.Print("USers each time: ", u)
+		if usr.Username == in.SourceUser.CurUser.Username {
+			tUsr := in.SourceUser.CurUser
+			temp_list.UsersList = append(temp_list.UsersList, tUsr)
+			new_usr := lUser{
+				Username:  tUsr.Username,
+				Password:  tUsr.Password,
+				Followers: tUsr.Followers,
+			}
+			u_List2.UsersList = append(u_List2.UsersList, new_usr)
+		} else {
+			temp_list.UsersList = append(temp_list.UsersList, u)
+			u_List2.UsersList = append(u_List2.UsersList, usr)
 		}
 	}
+
+	marred, _ := json.Marshal(u_List2)
+	log.Print("marred: ", string(marred))
+	_, err = cli.Put(ctx, "User", string(marred))
+
+	cancel()
 
 	return in.SourceUser.CurUser, nil
 }
@@ -413,6 +436,8 @@ func (s *server) GetAllUsers(ctx context.Context, in *pb.User) (*pb.Users, error
 		print("t.Followes: ", t.Followers)
 		u_List2.UsersList = append(u_List2.UsersList, t)
 	}
+
+	log.Print("all users in get all users: ", u_List2)
 
 	return u_List2, nil
 
