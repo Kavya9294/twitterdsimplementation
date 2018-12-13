@@ -210,10 +210,52 @@ func (s *server) GetPosts(ctx context.Context, in *pb.User) (*pb.Posts, error) {
 }
 
 func (s *server) AddPost(ctx context.Context, in *pb.Post) (*pb.Posts, error) {
-	s.listOfPosts = append(s.listOfPosts, in)
-	resp := new(pb.Posts)
-	resp.PostsList = s.listOfPosts
-	return resp, nil
+	//s.listOfPosts = append(s.listOfPosts, in)
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cli.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	resp, rerr := cli.Get(ctx, "Post")
+
+	var all_posts uPosts
+	new_post := lPost{
+		Username: in.Username,
+		Desc:     in.Desc,
+	}
+	if rerr != nil {
+		log.Print("Error in posts: ", rerr)
+	} else {
+		for _, ev := range resp.Kvs {
+			fmt.Printf("Value:  %s\n ", ev.Value)
+			_ = json.Unmarshal(ev.Value, &all_posts)
+			fmt.Print("Json thing Post\n", all_posts)
+		}
+	}
+	all_posts.PostsList = append(all_posts.PostsList, new_post)
+	marred, _ := json.Marshal(all_posts)
+	_, err = cli.Put(ctx, "Post", string(marred))
+
+	cancel()
+	all_posts2 := new(pb.Posts)
+	for _, p := range all_posts.PostsList {
+		t := &pb.Post{
+			Username: p.Username,
+			Desc:     p.Desc,
+		}
+		//print("t.Followes: ", t.Followers)
+		all_posts2.PostsList = append(all_posts2.PostsList, t)
+	}
+
+	return all_posts2, nil
+
+	//r := new(pb.Posts)
+	//r.PostsList = s.listOfPosts
+	//return r, nil
 }
 
 func (s *server) SetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUser, error) {
@@ -302,9 +344,50 @@ func (s *server) ToggleFollowers(ctx context.Context, in *pb.FollowUser) (*pb.Us
 }
 
 func (s *server) GetAllUsers(ctx context.Context, in *pb.User) (*pb.Users, error) {
-	user_list := new(pb.Users)
-	user_list.UsersList = s.listOfUsers
-	return user_list, nil
+	//user_list := new(pb.Users)
+	//user_list.UsersList = s.listOfUsers
+	//return user_list, nil
+
+	log.Print("In GetAllUsers")
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cli.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	resp, rerr := cli.Get(ctx, "User")
+
+	var u_List uList
+
+	if rerr != nil {
+		log.Print("Error: ", rerr)
+	} else {
+		for _, ev := range resp.Kvs {
+			fmt.Printf("Value:  %s\n ", ev.Value)
+			_ = json.Unmarshal(ev.Value, &u_List)
+			fmt.Print("Json thing\n", u_List.UsersList)
+		}
+	}
+
+	cancel()
+
+	u_List2 := new(pb.Users)
+
+	for _, u := range u_List.UsersList {
+		t := &pb.User{
+			Username:  u.Username,
+			Password:  u.Password,
+			Followers: u.Followers,
+		}
+		print("t.Followes: ", t.Followers)
+		u_List2.UsersList = append(u_List2.UsersList, t)
+	}
+
+	return u_List2, nil
+
 }
 
 func main() {
