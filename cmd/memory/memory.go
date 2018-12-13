@@ -1,20 +1,21 @@
 package main
 
-import "fmt"
-
 import (
 	"context"
 	"encoding/json"
-	"go.etcd.io/etcd/clientv3"
+	"fmt"
 	"log"
 	"net"
 	"time"
 
+	"go.etcd.io/etcd/clientv3"
+
 	pb "../../web/auth/authpb"
-	//"go.etcd.io/etcd/raft/raftpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+//"go.etcd.io/etcd/raft/raftpb"
 
 const (
 	port = ":50051"
@@ -24,6 +25,31 @@ type server struct {
 	listOfPosts []*pb.Post
 	listOfUsers []*pb.User
 	currentUser *pb.User
+}
+type lUser struct {
+	Username  string
+	Password  string
+	Followers []string
+}
+type uList struct {
+	UsersList []lUser
+}
+type lPost struct {
+	Username string
+	Desc     string
+}
+
+type uPosts struct {
+	PostsList []lPost
+}
+
+type currentU stuct {
+	CurUser lUser
+}
+
+type followU struct {
+	SourceUser currentU
+	DestUser lUser
 }
 
 func (s *server) Initialise(ctx context.Context, in *pb.User) (*pb.Users, error) {
@@ -65,8 +91,7 @@ func (s *server) Initialise(ctx context.Context, in *pb.User) (*pb.Users, error)
 
 func (s *server) AddUser(ctx context.Context, in *pb.User) (*pb.Users, error) {
 
-	//s.listOfUsers = append(s.listOfUsers, in)
-
+	log.Print("In addUser")
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
 		DialTimeout: 5 * time.Second,
@@ -78,26 +103,46 @@ func (s *server) AddUser(ctx context.Context, in *pb.User) (*pb.Users, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	resp, rerr := cli.Get(ctx, "User")
 
-	var usrList pb.Users
+	var u_List uList
+
 	if rerr != nil {
 		log.Print("Error: ", rerr)
 	} else {
 		for _, ev := range resp.Kvs {
-			fmt.Printf("Value:  %s ", ev.Value)
-			_ = json.Unmarshal(ev.Value, &usrList)
-			fmt.Print("Json thing\n", usrList)
+			fmt.Printf("Value:  %s\n ", ev.Value)
+			_ = json.Unmarshal(ev.Value, &u_List)
+			fmt.Print("Json thing\n", u_List.UsersList)
 		}
 
 	}
-	usrList.UsersList = append(usrList.UsersList, in)
-	marred, _ := json.Marshal(usrList)
+
+	log.Print("usrList: ", u_List.UsersList)
+	tempUser := lUser{
+		Username:  in.Username,
+		Password:  in.Password,
+		Followers: in.Followers,
+	}
+	log.Print("Temp user: ", tempUser)
+	u_List.UsersList = append(u_List.UsersList, tempUser)
+	log.Print("u_list: ", u_List.UsersList)
+	marred, _ := json.Marshal(u_List)
+	log.Print("marred: ", string(marred))
 	_, err = cli.Put(ctx, "User", string(marred))
 
 	cancel()
+	u_List2 := new(pb.Users)
 
-	//resp = new(pb.Users)
-	//resp.UsersList = s.listOfUsers
-	return &usrList, nil
+	for _, u := range u_List.UsersList {
+		t := &pb.User{
+			Username:  u.Username,
+			Password:  u.Password,
+			Followers: u.Followers,
+		}
+		print("t.Followes: ", t.Followers)
+		u_List2.UsersList = append(u_List2.UsersList, t)
+	}
+
+	return u_List2, nil
 }
 
 func (s *server) GetPosts(ctx context.Context, in *pb.User) (*pb.Posts, error) {
