@@ -42,6 +42,8 @@ func DoAuthLogin(w http.ResponseWriter, r *http.Request, allUsers *pb.Users) (bo
 	un, pw := str2[0], str2[1]
 	log.Print(auth)
 	stat := checkUser(un, pw, allUsers)
+	log.Print("allUsers in auth: ", allUsers)
+	log.Print("stat: ", stat)
 	if stat == true {
 		log.Print("VALID")
 		http.SetCookie(w, &http.Cookie{
