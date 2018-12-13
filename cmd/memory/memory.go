@@ -43,13 +43,13 @@ type uPosts struct {
 	PostsList []lPost
 }
 
-type currentU stuct {
+type currentU struct {
 	CurUser lUser
 }
 
 type followU struct {
 	SourceUser currentU
-	DestUser lUser
+	DestUser   lUser
 }
 
 func (s *server) Initialise(ctx context.Context, in *pb.User) (*pb.Users, error) {
@@ -147,24 +147,65 @@ func (s *server) AddUser(ctx context.Context, in *pb.User) (*pb.Users, error) {
 
 func (s *server) GetPosts(ctx context.Context, in *pb.User) (*pb.Posts, error) {
 	fmt.Print("In get Posts")
-	user := new(pb.User)
+
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cli.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	resp, rerr := cli.Get(ctx, "Post")
+
+	var all_posts uPosts
+	if rerr != nil {
+		log.Print("Error in posts: ", rerr)
+	} else {
+		for _, ev := range resp.Kvs {
+			fmt.Printf("Value:  %s\n ", ev.Value)
+			_ = json.Unmarshal(ev.Value, &all_posts)
+			fmt.Print("Json thing Post\n", all_posts)
+		}
+	}
+
+	var temp_user lUser
 	currentUserName := in.Username
-	for _, i := range s.listOfUsers {
+	respUser, respErr := cli.Get(ctx, "User")
+	var u_List uList
+
+	if respErr != nil {
+		log.Print("Error: ", rerr)
+	} else {
+		for _, ev := range respUser.Kvs {
+			fmt.Printf("Value:  %s\n ", ev.Value)
+			_ = json.Unmarshal(ev.Value, &u_List)
+			fmt.Print("Json thing user\n", u_List.UsersList)
+		}
+	}
+
+	for _, i := range u_List.UsersList {
 		if i.Username == currentUserName {
-			user = i
+			temp_user = i
+			break
 		}
 	}
 	followingPosts := new(pb.Posts)
-	all_posts := s.listOfPosts
-	for _, following := range user.Followers {
-		for _, ind_post := range all_posts {
-			if ind_post.Username == following {
 
-				followingPosts.PostsList = append(followingPosts.PostsList, ind_post)
+	for _, following := range temp_user.Followers {
+		for _, ind_post := range all_posts.PostsList {
+			if ind_post.Username == following {
+				temp_post := &pb.Post{
+					Username: ind_post.Username,
+					Desc:     ind_post.Desc,
+				}
+				followingPosts.PostsList = append(followingPosts.PostsList, temp_post)
 				fmt.Print("Posts in followingPosts: ", followingPosts)
 			}
 		}
 	}
+	cancel()
 	return followingPosts, nil
 }
 
@@ -178,19 +219,49 @@ func (s *server) AddPost(ctx context.Context, in *pb.Post) (*pb.Posts, error) {
 func (s *server) SetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUser, error) {
 	user := new(pb.CurrentUser)
 	user.CurUser = in
-	//s.currentUser = in
 	return user, nil
 }
 
 func (s *server) GetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUser, error) {
+	log.Print("\nIn getCureentUser\n")
+
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cli.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	resp, rerr := cli.Get(ctx, "User")
+
+	var u_List uList
+
+	if rerr != nil {
+		log.Print("Error: ", rerr)
+	} else {
+		for _, ev := range resp.Kvs {
+			fmt.Printf("Value:  %s\n ", ev.Value)
+			_ = json.Unmarshal(ev.Value, &u_List)
+			fmt.Print("Json thing\n", u_List.UsersList)
+		}
+
+	}
 	user := new(pb.CurrentUser)
-	for _, usr := range s.listOfUsers {
+
+	for _, usr := range u_List.UsersList {
 		if in.Username == usr.Username {
-			user.CurUser = usr
+			t_user := &pb.User{
+				Username:  usr.Username,
+				Password:  usr.Password,
+				Followers: usr.Followers,
+			}
+			user.CurUser = t_user
+			break
 		}
 	}
-
-	//user.CurUser = s.currentUser
+	cancel()
 	return user, nil
 }
 
