@@ -308,10 +308,37 @@ func (s *server) GetCurrentUser(ctx context.Context, in *pb.User) (*pb.CurrentUs
 }
 
 func (s *server) ToggleFollowers(ctx context.Context, in *pb.FollowUser) (*pb.User, error) {
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cli.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	resp, rerr := cli.Get(ctx, "User")
+
+	var u_List uList
+
+	if rerr != nil {
+		log.Print("Error: ", rerr)
+	} else {
+		for _, ev := range resp.Kvs {
+			fmt.Printf("Value:  %s\n ", ev.Value)
+			_ = json.Unmarshal(ev.Value, &u_List)
+			fmt.Print("Json thing\n", u_List.UsersList)
+		}
+
+	}
+
 	user := new(pb.User)
-	for _, i := range s.listOfUsers {
+	for _, i := range u_List.UsersLists {
 		if i.Username == in.SourceUser.CurUser.Username {
-			user = i
+			user.Username = i.Username
+			user.Password = i.Password
+			user.Followers = i.Followers
+			break
 		}
 	}
 	pos := -1
@@ -333,9 +360,10 @@ func (s *server) ToggleFollowers(ctx context.Context, in *pb.FollowUser) (*pb.Us
 		}
 	}
 	in.SourceUser.CurUser.Followers = following_new_list
-	for i := 0; i < len(s.listOfUsers); i++ {
-		if s.listOfUsers[i].Username == in.SourceUser.CurUser.Username {
-			s.listOfUsers[i] = in.SourceUser.CurUser
+
+	for i := 0; i < len(u_List); i++ {
+		if u_List[i].Username == in.SourceUser.CurUser.Username {
+			u_list[i] = in.SourceUser.CurUser
 			break
 		}
 	}

@@ -257,22 +257,16 @@ func FollowsHandler(w http.ResponseWriter, r *http.Request) {
 		SourceUser: tempUser2,
 		DestUser:   destUser,
 	}
-	//curUser := getCurrentUser()
 	_, e := client.ToggleFollowers(context.Background(), FUser)
 	if e != nil {
 		log.Printf("Error")
 	}
-	//log.Print("followers_list: ", followers_list)
 	http.Redirect(w, r, "/post", http.StatusSeeOther)
 }
 
 func getReqesterName(r *http.Request) string {
 	cookie, err := r.Cookie("userInfo")
-	//auth := r.Header.Get("Authorization")
-	//log.Print("Auth Header ->")
-	//log.Print(r.Header)
-	//str := strings.Split(, ":")
-	//str2 := strings.Split(str[1], " ")
+
 	if err != nil {
 		log.Print("Error in getREquesterName : ", err)
 	}
