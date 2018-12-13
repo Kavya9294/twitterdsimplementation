@@ -4,10 +4,14 @@ import "fmt"
 
 import (
 	"context"
+	"encoding/json"
+	"go.etcd.io/etcd/clientv3"
 	"log"
 	"net"
+	"time"
 
 	pb "../../web/auth/authpb"
+	//"go.etcd.io/etcd/raft/raftpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -24,6 +28,7 @@ type server struct {
 
 func (s *server) Initialise(ctx context.Context, in *pb.User) (*pb.Users, error) {
 	var flag1, flag2 bool
+
 	if s.listOfUsers == nil {
 		s.listOfUsers = []*pb.User{
 			&pb.User{Username: "Nikhila", Password: "aGVsbG8=", Followers: []string{"Nikhila", "Kavya"}},
@@ -60,11 +65,39 @@ func (s *server) Initialise(ctx context.Context, in *pb.User) (*pb.Users, error)
 
 func (s *server) AddUser(ctx context.Context, in *pb.User) (*pb.Users, error) {
 
-	s.listOfUsers = append(s.listOfUsers, in)
+	//s.listOfUsers = append(s.listOfUsers, in)
 
-	resp := new(pb.Users)
-	resp.UsersList = s.listOfUsers
-	return resp, nil
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cli.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	resp, rerr := cli.Get(ctx, "User")
+
+	var usrList pb.Users
+	if rerr != nil {
+		log.Print("Error: ", rerr)
+	} else {
+		for _, ev := range resp.Kvs {
+			fmt.Printf("Value:  %s ", ev.Value)
+			_ = json.Unmarshal(ev.Value, &usrList)
+			fmt.Print("Json thing\n", usrList)
+		}
+
+	}
+	usrList.UsersList = append(usrList.UsersList, in)
+	marred, _ := json.Marshal(usrList)
+	_, err = cli.Put(ctx, "User", string(marred))
+
+	cancel()
+
+	//resp = new(pb.Users)
+	//resp.UsersList = s.listOfUsers
+	return &usrList, nil
 }
 
 func (s *server) GetPosts(ctx context.Context, in *pb.User) (*pb.Posts, error) {
@@ -152,64 +185,15 @@ func (s *server) ToggleFollowers(ctx context.Context, in *pb.FollowUser) (*pb.Us
 	return in.SourceUser.CurUser, nil
 }
 
-//func GetCurrentUser(req *http.Request) User {
-//cookie, err := req.Cookie("userInfo")
-//fmt.Print("Cookie: ", cookie)
-//if err != nil {
-//fmt.Print("Error in getCurrentUser : ", err)
-//return User{}
-//}
-//userInfo := cookie.Value
-//fmt.Print("userInfo: ", userInfo)
-//temp_string := strings.Split(userInfo, ":")
-//un, pw := temp_string[0], temp_string[1]
-//for _, user := range Users {
-//if un == user.Username && pw == user.Password {
-//Cur_user = user
-//return Cur_user
-//}
-//}
-//return User{"", "", []string{""}}
-
-//}
-
-//func ToggleFollower(duser string) []string {
-//pos := -1
-//following_list := Cur_user.Following
-//var following_new_list []string
-//for index, following := range following_list {
-//if duser == following {
-//pos = index
-//}
-//}
-//if pos == -1 {
-//following_list = append(following_list, duser)
-//following_new_list = following_list
-//} else {
-//for i, follow := range following_list {
-//if i != pos {
-//following_new_list = append(following_new_list, follow)
-//}
-//}
-//}
-//Cur_user.Following = following_new_list
-//return following_new_list
-//}
-
 func (s *server) GetAllUsers(ctx context.Context, in *pb.User) (*pb.Users, error) {
 	user_list := new(pb.Users)
-	//userName := in.CurUser.Username
-	//for _, user := range s.listOfUsers {
-	//if userName != user.Username {
-	//user_list.UsersList = append(user_list.UsersList, user)
-	//}
-	//}
 	user_list.UsersList = s.listOfUsers
 	return user_list, nil
 }
 
 func main() {
 	lis, err := net.Listen("tcp", port)
+
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
