@@ -2,6 +2,9 @@
 
 <head>
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Tweet Away</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <style>
     body
 {
@@ -9,8 +12,10 @@
  padding:0px;
  text-align:center;
  width:100%;
- font-family: "Myriad Pro","Helvetica Neue",Helvetica,Arial,Sans-Serif;
- background-color:#ECF0F1;
+ background-color:white;
+}
+.margin_top_5 {
+  margin-top:5% !important;
 }
 #wrapper
 {
@@ -34,7 +39,7 @@ font-size:18px;
 width:330px;
 margin-left:320px;
 padding:10px;
-background-color:#424949;
+background-color: rgb(114,0,255,0.08);
 }
 .form_div .form_label
 {
@@ -200,14 +205,14 @@ width:80%;
 </script>
 
 <body>
-  <div id="wrapper">
+  <div id="wrapper margin_top_5">
 
     <div class="form_div">
       <p class="form_label"></p>
       <form method="post" id="login">
         <p><input type="text" placeholder="Enter Username" name="uname" id="uname"></p>
         <p><input type="password" placeholder="**********" name="password" id="password" required></p>
-        <p><input type="button" value="LOGIN" onclick="doLogin()"></p>
+        <p><input type="button" class="btn" value="LOGIN" onclick="doLogin()"></p>
       </form>
     </div>
     <br>
@@ -218,7 +223,7 @@ width:80%;
       <form method="post" id="signup">
         <p><input type="text" placeholder="Enter username" name="susername" id="susername"></p>
         <p><input type="password" placeholder="**********" name="spassword" id="spassword"></p>
-        <p><input type="button" value="SIGNUP" onclick="doSignup()"></p>
+        <p><input type="button" class="btn" value="SIGNUP" onclick="doSignup()"></p>
       </form>
     </div>
 
