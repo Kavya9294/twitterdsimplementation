@@ -22,12 +22,30 @@ Open a new terminal window
 cd cmd/web/
 Start the HTTP Server(gRPC Client): go run web.go
 
+Running raft node clusters: 
+In order to run the node clusters configured, please goto the $GOPATH(in this case, our project folder) , and execute the following command:
+ etcd
+
+Starting a node : This command is used to start the configured node
+./bin/goreman run start etcd2
+
+Deleting a node : This command is used to stop the configured node 
+./bin/goreman run stop etcd2
+
+To execute the Procfile:
+./bin/goreman -f Procfile start
+
+In order to validate the data being persistent on the nodes, please execute the following command:
+Navigate to the $GOPATH where etc has been imported.
+./src/go.etcd.io/etcd/bin/etcdctl --endpoints= localhost:22379 get "Post"
+
+
 UI:-
 
 Open http://localhost:9090/
 Clear Cookies
-Check for existing user : Username ="Nikhila",Password="hello" (to check sign in flow)
 Check for new user : Enter username and password in the signup section(to check for sign up flow)
+We do not have any test data. Persistence if data is shown as when users are added and their posts are added.
 
 User Flow Description :-
 
@@ -46,6 +64,3 @@ run "go test -v"
 --AUTHENTICATION TESTS--
 cd web/auth/
 run "go test -v"
-
-Known UI bug:-
--> The following button's color consistance. Although, the number of followers is getting updated correctly in the backend,the same is not correctly indicated in the UI.
