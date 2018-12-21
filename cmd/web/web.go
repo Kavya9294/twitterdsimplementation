@@ -247,14 +247,16 @@ func FollowsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("dest User : ", toggleUser)
 	requester := getReqesterName(r)
 	log.Println("requester: ", requester)
-	tempUser1 := &pb.User{
-		Username: requester,
+	cur_user, cerr := client.GetCurrentUser(context.Background(), &pb.User{Username: requester})
+
+	if cerr != nil {
+		log.Printf("Error")
 	}
-	tempUser2 := &pb.CurrentUser{
-		CurUser: tempUser1,
-	}
+
+	log.Print("current_user: ", cur_user.CurUser.Username)
+
 	FUser := &pb.FollowUser{
-		SourceUser: tempUser2,
+		SourceUser: cur_user,
 		DestUser:   destUser,
 	}
 	_, e := client.ToggleFollowers(context.Background(), FUser)
