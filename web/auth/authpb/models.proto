@@ -32,7 +32,6 @@ message Users {
 }
 
 service Access {
-  rpc Initialise(User) returns(Users){}
   rpc AddUser(User) returns(Users){}
   rpc GetPosts(User) returns(Posts) {}
   rpc AddPost(Post) returns(Posts){}

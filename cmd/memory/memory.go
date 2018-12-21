@@ -52,43 +52,6 @@ type followU struct {
 	DestUser   lUser
 }
 
-func (s *server) Initialise(ctx context.Context, in *pb.User) (*pb.Users, error) {
-	var flag1, flag2 bool
-
-	if s.listOfUsers == nil {
-		s.listOfUsers = []*pb.User{
-			&pb.User{Username: "Nikhila", Password: "aGVsbG8=", Followers: []string{"Nikhila", "Kavya"}},
-			&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
-			&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
-		}
-		flag1 = true
-	} else {
-		flag1 = false
-	}
-	if s.listOfPosts == nil {
-		s.listOfPosts = []*pb.Post{
-			&pb.Post{Username: "Nikhila", Desc: "Life is great"},
-			&pb.Post{Username: "Kavya", Desc: "Music is Life"},
-			&pb.Post{Username: "Navi", Desc: "Rock and roll all the way"},
-			&pb.Post{Username: "Navi", Desc: "Pink floyed-Wish you were here-#rythm#to#ears"},
-			&pb.Post{Username: "Nikhila", Desc: "Artic Monkeys#best#ever#music"},
-		}
-		flag2 = true
-	} else {
-		flag2 = false
-	}
-	user_resp := new(pb.Users)
-	if flag1 && flag2 {
-		log.Println("Initialisation complete")
-		log.Println(s.listOfUsers)
-		log.Println(s.listOfPosts)
-
-		user_resp.UsersList = s.listOfUsers
-		return user_resp, nil
-	}
-	return user_resp, nil
-}
-
 func (s *server) AddUser(ctx context.Context, in *pb.User) (*pb.Users, error) {
 
 	log.Print("In addUser")

@@ -279,16 +279,12 @@ func getReqesterName(r *http.Request) string {
 }
 
 func main() {
-	log.Print("Calling init")
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("cannot dial server: %v", err)
 	}
 
 	client = pb.NewAccessClient(conn)
-	client.Initialise(context.Background(), &pb.User{
-		Username: "init",
-	})
 
 	http.HandleFunc("/", SignupHandler)
 	http.HandleFunc("/login", LoginHandler)
