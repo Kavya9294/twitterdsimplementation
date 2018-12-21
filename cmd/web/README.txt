@@ -64,6 +64,10 @@ Add text in the post description section and click on Post button to add new pos
 
 Running Test Cases:-
 
+Clear the raft persistent data before running test cases
+./bin/etcdctl --endpoints=localhost:22379 del "User"
+./bin/etcdctl --endpoints=localhost:22379 del "Post"
+
 --GRPC TESTS--
 cd cmd/memory/
 run "go test -v"
