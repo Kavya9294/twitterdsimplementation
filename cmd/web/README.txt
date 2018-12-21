@@ -1,7 +1,5 @@
 Project structure:-
 
-We have followed the same structure that was provided by the TA
-
 cmd/web/web.go : All the HTTP request handlers are present here.
 cmd/views/* : Contains the templates used for the frontend
 cmd/memory/memory.go : Contains the gRPC logic used to access/modify data
@@ -26,26 +24,35 @@ Running raft node clusters:
 In order to run the node clusters configured, please goto the $GOPATH(in this case, our project folder) , and execute the following command:
  etcd
 
+Run the cluster like so:
+go get go.etcd.io/etcd/etcdctl
+go get github.com/mattn/goreman
+
+(1) ./bin/goreman -f Procfile start
+
+
+Testing for Persistance:-
+
 Starting a node : This command is used to start the configured node
-./bin/goreman run start etcd2
+(2) ./bin/goreman run start etcd2
 
 Deleting a node : This command is used to stop the configured node 
-./bin/goreman run stop etcd2
-
-To execute the Procfile:
-./bin/goreman -f Procfile start
+(3) ./bin/goreman run stop etcd2
 
 In order to validate the data being persistent on the nodes, please execute the following command:
-Navigate to the $GOPATH where etc has been imported.
-./src/go.etcd.io/etcd/bin/etcdctl --endpoints= localhost:22379 get "Post"
+(4) ./bin/etcdctl --endpoints=localhost:22379 get "Post"
 
+Run the above command once a few posts have been added.
+Run it again after stopping and starting node using commands (2) and (3) to check for persistance of data 
+even when a node has been brought down and back up again.
 
 UI:-
 
 Open http://localhost:9090/
 Clear Cookies
 Check for new user : Enter username and password in the signup section(to check for sign up flow)
-We do not have any test data. Persistence if data is shown as when users are added and their posts are added.
+Login with the same user details at http://localhost:9090/login to test for exisitng user.
+
 
 User Flow Description :-
 
