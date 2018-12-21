@@ -13,7 +13,7 @@ func Test_checkUser(t *testing.T) {
 		allUsers *pb.Users
 	}
 	listOfUsers := []*pb.User{
-		&pb.User{Username: "Nikhila", Password: "aGVsbG8=", Followers: []string{"Nikhila", "Kavya"}},
+		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
 	}
@@ -25,7 +25,7 @@ func Test_checkUser(t *testing.T) {
 		want bool
 	}{
 
-		{"CheckUser Correct Password", args{"Nikhila", "aGVsbG8=", user_resp}, true},
+		{"CheckUser Correct Password", args{"Nikhila", "aGVsbG8=4", user_resp}, true},
 		{"CheckUser Incorrect Password", args{"Nikhila", "aGVsbG8", user_resp}, false},
 	}
 	for _, tt := range tests {

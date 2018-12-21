@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"os/exec"
 	"reflect"
 	"testing"
 
@@ -31,7 +28,7 @@ func Test_server_Initialise(t *testing.T) {
 		in  *pb.User
 	}
 	testUserList := []*pb.User{
-		&pb.User{Username: "Nikhila", Password: "aGVsbG8=", Followers: []string{"Nikhila", "Kavya"}},
+		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
 	}
@@ -44,7 +41,7 @@ func Test_server_Initialise(t *testing.T) {
 	}
 	testCurrentUser := &pb.User{
 		Username:  "Nikhila",
-		Password:  "aGVsbG8=",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	testpbUser := &pb.User{
@@ -82,7 +79,7 @@ func Test_server_Initialise(t *testing.T) {
 	}()
 }
 */
-
+/*
 func killNode(nodename string) {
 	str := os.Getenv("GOPATH")
 	cmd := exec.Command("goreman", "run", "stop", nodename)
@@ -112,23 +109,24 @@ func restartNode(nodename string) {
 		//fmt.Print(str1)
 	}
 }
-
+*/
 func Test_setup(t *testing.T) {
 	s := new(server)
 	s.AddUser(context.Background(), &pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}})
-	/*s.AddUser(context.Background(), &pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}})
+	s.AddUser(context.Background(), &pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}})
 	s.AddUser(context.Background(), &pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}})
 	s.AddPost(context.Background(), &pb.Post{Username: "Nikhila", Desc: "Life is great"})
 	s.AddPost(context.Background(), &pb.Post{Username: "Kavya", Desc: "Music is Life"})
 	s.AddPost(context.Background(), &pb.Post{Username: "Navi", Desc: "Rock and roll all the way"})
 	s.AddPost(context.Background(), &pb.Post{Username: "Navi", Desc: "Pink floyed-Wish you were here-#rythm#to#ears"})
 	s.AddPost(context.Background(), &pb.Post{Username: "Nikhila", Desc: "Artic Monkeys#best#ever#music"})
-	*/
 }
 
+/*
 func Test_networkreplication(t *testing.T) {
 
 }
+*/
 
 func Test_server_AddUser(t *testing.T) {
 	type fields struct {
@@ -157,15 +155,15 @@ func Test_server_AddUser(t *testing.T) {
 		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
-		&pb.User{Username: "Nikhila2", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
+		&pb.User{Username: "Adam", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
 	}
 	testCurrentUser := &pb.User{
 		Username:  "Nikhila",
-		Password:  "aGVsbG8=",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	newUser := &pb.User{
-		Username:  "Nikhila2",
+		Username:  "Adam",
 		Password:  "aGVsbG8=3",
 		Followers: []string{"Kavya", "Navi"},
 	}
@@ -214,7 +212,7 @@ func Test_server_GetPosts(t *testing.T) {
 		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
-		&pb.User{Username: "Nikhila2", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
+		&pb.User{Username: "Adam", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
 	}
 
 	testPostList := []*pb.Post{
@@ -226,7 +224,7 @@ func Test_server_GetPosts(t *testing.T) {
 	}
 	testCurrentUser := &pb.User{
 		Username:  "Nikhila",
-		Password:  "aGVsbG8=",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	postsUser := &pb.User{
@@ -282,7 +280,7 @@ func Test_server_AddPost(t *testing.T) {
 		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
-		&pb.User{Username: "Nikhila2", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
+		&pb.User{Username: "Adam", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
 	}
 
 	testPostList := []*pb.Post{
@@ -294,7 +292,7 @@ func Test_server_AddPost(t *testing.T) {
 	}
 	testCurrentUser := &pb.User{
 		Username:  "Nikhila",
-		Password:  "aGVsbG8=",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	newpost := &pb.Post{
@@ -354,7 +352,7 @@ func Test_server_SetCurrentUser(t *testing.T) {
 		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
-		&pb.User{Username: "Nikhila2", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
+		&pb.User{Username: "Adam", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
 	}
 
 	testPostList := []*pb.Post{
@@ -366,7 +364,7 @@ func Test_server_SetCurrentUser(t *testing.T) {
 	}
 	testCurrentUser := &pb.User{
 		Username:  "Nikhila",
-		Password:  "aGVsbG8=",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	currentUser := &pb.User{
@@ -419,7 +417,7 @@ func Test_server_GetCurrentUser(t *testing.T) {
 		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
-		&pb.User{Username: "Nikhila2", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
+		&pb.User{Username: "Adam", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
 	}
 
 	testPostList := []*pb.Post{
@@ -431,7 +429,7 @@ func Test_server_GetCurrentUser(t *testing.T) {
 	}
 	testCurrentUser := &pb.User{
 		Username:  "Nikhila",
-		Password:  "aGVsbG8=",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	currentUser := &pb.User{
@@ -484,7 +482,7 @@ func Test_server_ToggleFollowers(t *testing.T) {
 		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
-		&pb.User{Username: "Nikhila2", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
+		&pb.User{Username: "Adam", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
 	}
 
 	testPostList := []*pb.Post{
@@ -496,17 +494,17 @@ func Test_server_ToggleFollowers(t *testing.T) {
 	}
 	testCurrentUser := &pb.User{
 		Username:  "Nikhila",
-		Password:  "aGVsbG8=",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	destUser := &pb.User{
 		Username: "Navi",
 	}
-	tempUser1 := &pb.User{
+	/*tempUser1 := &pb.User{
 		Username: "Nikhila",
-	}
+	}*/
 	tempUser2 := &pb.CurrentUser{
-		CurUser: tempUser1,
+		CurUser: testCurrentUser,
 	}
 	FUser := &pb.FollowUser{
 		SourceUser: tempUser2,
@@ -514,10 +512,12 @@ func Test_server_ToggleFollowers(t *testing.T) {
 	}
 	testwant1 := &pb.User{
 		Username:  "Nikhila",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya", "Navi"},
 	}
 	testwant2 := &pb.User{
 		Username:  "Nikhila",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	tests := []struct {
@@ -564,7 +564,7 @@ func Test_server_GetAllUsers(t *testing.T) {
 		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
-		&pb.User{Username: "Nikhila2", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
+		&pb.User{Username: "Adam", Password: "aGVsbG8=3", Followers: []string{"Kavya", "Navi"}},
 	}
 
 	testPostList := []*pb.Post{
@@ -576,7 +576,7 @@ func Test_server_GetAllUsers(t *testing.T) {
 	}
 	testCurrentUser := &pb.User{
 		Username:  "Nikhila",
-		Password:  "aGVsbG8=",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	argUser := &pb.User{
@@ -616,7 +616,7 @@ func Test_server_GetAllUsers(t *testing.T) {
 /*
 func TestMain(m *testing.M) {
 	testUserList := []*pb.User{
-		&pb.User{Username: "Nikhila", Password: "aGVsbG8=", Followers: []string{"Nikhila", "Kavya"}},
+		&pb.User{Username: "Nikhila", Password: "aGVsbG8=4", Followers: []string{"Nikhila", "Kavya"}},
 		&pb.User{Username: "Kavya", Password: "eWlwcGVl", Followers: []string{"Kavya", "Navi"}},
 		&pb.User{Username: "Navi", Password: "bm9pY2VlZQ==", Followers: []string{"Navi", "Nikhila"}},
 	}
@@ -629,7 +629,7 @@ func TestMain(m *testing.M) {
 	}
 	testCurrentUser := &pb.User{
 		Username:  "Nikhila",
-		Password:  "aGVsbG8=",
+		Password:  "aGVsbG8=4",
 		Followers: []string{"Nikhila", "Kavya"},
 	}
 	testpbUser := &pb.User{
